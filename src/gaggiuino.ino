@@ -18,6 +18,8 @@ PredictiveWeight predictiveWeight;
 
 SensorState currentState;
 
+HeatState heatState;
+
 OPERATION_MODES selectedOperationalMode;
 
 eepromValues_t runningCfg;
@@ -98,6 +100,9 @@ void setup(void) {
   led.setColor(9u, 0u, 9u); // 64171
 
   iwdcInit();
+  
+  // PID Init
+  allPIDsInit();
 }
 
 //##############################################################################################################################
@@ -143,7 +148,8 @@ static void sensorReadSwitches(void) {
 
 static void sensorsReadTemperature(void) {
   if (millis() > thermoTimer) {
-    currentState.temperature = thermocoupleRead() - runningCfg.offsetTemp;
+    currentState.sensorTemperature = thermocoupleRead();
+    currentState.temperature = currentState.sensorTemperature - runningCfg.offsetTemp;
     thermoTimer = millis() + GET_KTYPE_READ_EVERY;
   }
 }
@@ -306,7 +312,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
-      brewActive ? setBoilerOff() : justDoCoffee(runningCfg, currentState, false);
+      brewActive ? setBoilerOff() : justDoCoffeeBetter(runningCfg, currentState, heatState, false);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
@@ -321,7 +327,7 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_descale:
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
-      deScale(runningCfg, currentState);
+      deScale(runningCfg, currentState, heatState);
       break;
     default:
       pageValuesRefresh();
@@ -717,7 +723,7 @@ static void profiling(void) {
     closeValve();
   }
   // Keep that water at temp
-  justDoCoffee(runningCfg, currentState, brewActive);
+  justDoCoffeeBetter(runningCfg, currentState, heatState, brewActive);
 }
 
 static void manualFlowControl(void) {
@@ -729,7 +735,7 @@ static void manualFlowControl(void) {
     setPumpOff();
     closeValve();
   }
-  justDoCoffee(runningCfg, currentState, brewActive);
+  justDoCoffeeBetter(runningCfg, currentState, heatState, brewActive);
 }
 
 //#############################################################################################
@@ -749,6 +755,7 @@ static void brewDetect(void) {
       brewParamsReset();
       paramsReset = true;
       brewActive = true;
+      heatStatesReset(brewActive);
     }
     // needs to be here as it creates a locking state soemtimes if not kept up to date during brew
     // mainly when shotWeight restriction kick in.
@@ -758,6 +765,7 @@ static void brewDetect(void) {
     currentState.pumpClicks = getAndResetClickCounter();
     if (paramsReset) {
       brewParamsReset();
+      heatStatesReset(brewActive);
       paramsReset = false;
     }
   }
@@ -776,6 +784,22 @@ static void brewParamsReset(void) {
   weightMeasurements.clear();
   predictiveWeight.reset();
   phaseProfiler.reset();
+}
+
+static void heatStatesReset(bool brewActive) {
+  setBoilerOff();
+  // reset HeatState
+  heatState.brewActive = brewActive;
+  heatState.heatBalancePool = 0.f;
+  heatState.lastBoilerState = false;
+  heatState.lastBoilerStateTimestamp = millis() - 1000;     //make sure trigger heat compute
+  heatState.lastPidAdjustTimestamp = millis() - 1000; 
+  heatState.lastWaterPumped = 0.f;
+  heatState.lastWaterPumpedTimestamp = millis() - 1000;
+  heatState.pidAdjustHeat = 0.f;
+  heatState.thermoCompensateHeat = 0.f;
+  heatState.thermoHeaterWasted = 0.f;
+
 }
 
 static bool sysReadinessCheck(void) {
@@ -850,7 +874,7 @@ static inline void sysHealthCheck(float pressureThreshold) {
           lcdRefresh();
           lcdListen();
           sensorsRead();
-          justDoCoffee(runningCfg, currentState, brewActive);
+          justDoCoffeeBetter(runningCfg, currentState, heatState, brewActive);
           break;
         default:
           sensorsRead();
@@ -871,13 +895,15 @@ static inline void sysHealthCheck(float pressureThreshold) {
   if (lcdCurrentPageId == NextionPage::BrewManual) return;
 
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
-    if (millis() >= systemHealthTimer - 3500ul && millis() <= systemHealthTimer - 500ul) {
-      char tmp[25];
-      int countdown = (int)(systemHealthTimer-millis())/1000;
-      unsigned int check = snprintf(tmp, sizeof(tmp), "Dropping beats in: %i", countdown);
-      if (check > 0 && check <= sizeof(tmp)) {
+    unsigned long currentTimer = millis();
+    if (currentTimer >= systemHealthTimer - 3500ul && currentTimer <= systemHealthTimer - 500ul) {
+      int charSize = 25;
+      char tmp[charSize]= "Dropping beats in: ?";
+      int countdown = round((systemHealthTimer-currentTimer)*0.001f);
+      unsigned int check = snprintf(tmp, charSize, "Dropping beats in: %i", countdown);
+      // if (check > 0 && check <= charSize) {
         lcdShowPopup(tmp);
-      }
+      // }
     }
   }
   #endif

@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include "sensors_state.h"
+#include "heat_state.h"
 #include "../eeprom_data/eeprom_data.h"
 
 const unsigned long DESCALE_PHASE1_EVERY = 30000UL; //30000 // short pump pulses during descale
@@ -22,7 +23,7 @@ enum class DescalingState {
   FINISHED
 };
 
-void deScale(eepromValues_t &runningCfg, const SensorState &currentState);
+void deScale(eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState);
 void solenoidBeat(void);
 void backFlush(const SensorState &currentState);
 void flushActivated(void);

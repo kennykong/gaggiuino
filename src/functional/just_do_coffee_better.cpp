@@ -13,44 +13,21 @@ inline static float TEMP_DELTA(float d, const SensorState &currentState) {
   );
 }
 
-void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentState, const bool brewActive) {
+void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive) {
   lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
-  float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint + runningCfg.offsetTemp;
-  float sensorTemperature = currentState.temperature + runningCfg.offsetTemp;
+  float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint;
+  MiniPID offBrewPid = getOffBrewPID();
+  MiniPID onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
-    if(sensorTemperature <= brewTempSetPoint - 5.f) {
-      setBoilerOn();
-    } else {
-      float deltaOffset = 0.f;
-      if (runningCfg.brewDeltaState) {
-        float tempDelta = TEMP_DELTA(brewTempSetPoint, currentState);
-        float BREW_TEMP_DELTA = mapRange(sensorTemperature, brewTempSetPoint, brewTempSetPoint + tempDelta, tempDelta, 0, 0);
-        deltaOffset = constrain(BREW_TEMP_DELTA, 0, tempDelta);
-      }
-      if (sensorTemperature <= brewTempSetPoint + deltaOffset) {
-        pulseHeaters(runningCfg.hpwr, runningCfg.mainDivider, runningCfg.brewDivider, brewActive);
-      } else {
-        setBoilerOff();
-      }
-    }
+    computeThermoCompensateEnergy(0, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+    computePIDAdjustEnergy(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+    computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
+    driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
   } else { //if brewState == false
-    if (sensorTemperature <= ((float)brewTempSetPoint - 10.f)) {
-      setBoilerOn();
-    } else {
-      int HPWR_LOW = runningCfg.hpwr / runningCfg.mainDivider;
-      // Calculating the boiler heating power range based on the below input values
-      int HPWR_OUT = mapRange(sensorTemperature, brewTempSetPoint - 10, brewTempSetPoint, runningCfg.hpwr, HPWR_LOW, 0);
-      HPWR_OUT = constrain(HPWR_OUT, HPWR_LOW, runningCfg.hpwr);  // limits range of sensor values to HPWR_LOW and HPWR
-
-      if (sensorTemperature <= ((float)brewTempSetPoint - 5.f)) {
-        pulseHeaters(HPWR_OUT, 1, runningCfg.mainDivider, brewActive);
-      } else if (sensorTemperature < ((float)brewTempSetPoint)) {
-        pulseHeaters(HPWR_OUT,  runningCfg.brewDivider, runningCfg.brewDivider, brewActive);
-      } else {
-        setBoilerOff();
-      }
-    }
+    computePIDAdjustEnergy(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
+    computeHeaterWastedEnergy(heatState, HEAT_TIME_INTERVAL);
+    driveHeaterByEnergyBalance(heatState, HEAT_TIME_INTERVAL);
   }
   if (brewActive || !currentState.brewSwitchState) { // keep steam boiler supply valve open while steaming/descale only
     setSteamValveRelayOff();
@@ -58,19 +35,6 @@ void justDoCoffee(const eepromValues_t &runningCfg, const SensorState &currentSt
   setSteamBoilerRelayOff();
 }
 
-void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int factor_2, const bool brewActive) {
-  static uint32_t heaterWave;
-  static bool heaterState;
-  if (!heaterState && ((millis() - heaterWave) > (pulseLength * factor_1))) {
-    brewActive ? setBoilerOff() : setBoilerOn();
-    heaterState=!heaterState;
-    heaterWave=millis();
-  } else if (heaterState && ((millis() - heaterWave) > (pulseLength / factor_2))) {
-    brewActive ? setBoilerOn() : setBoilerOff();
-    heaterState=!heaterState;
-    heaterWave=millis();
-  }
-}
 
 //#############################################################################################
 //################################____STEAM_POWER_CONTROL____##################################

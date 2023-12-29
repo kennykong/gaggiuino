@@ -1,6 +1,6 @@
 /* 09:32 15/03/2023 - change triggering comment */
 #include "descale.h"
-#include "just_do_coffee.h"
+#include "just_do_coffee_better.h"
 #include "../peripherals/internal_watchdog.h"
 #include "../lcd/lcd.h"
 
@@ -11,7 +11,7 @@ uint8_t counter = 0;
 unsigned long descalingTimer = 0;
 int descalingCycle = 0;
 
-void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
+void deScale(eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState) {
   switch (descalingState) {
     case DescalingState::IDLE: // Waiting for fuckfest to begin
       if (currentState.brewSwitchState) {
@@ -71,7 +71,7 @@ void deScale(eepromValues_t &runningCfg, const SensorState &currentState) {
       }
       break;
   }
-  justDoCoffee(runningCfg, currentState, false);
+  justDoCoffeeBetter(runningCfg, currentState, heatState, false);
 }
 
 void solenoidBeat() {
