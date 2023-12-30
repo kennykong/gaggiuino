@@ -2,70 +2,76 @@
 /* PID control and thermo compensation*/
 
 #include "thermo_controll.h"
-#include "math.h"
 
 namespace {
-  class PIDGroup {
+  class PIDGroupSingleton {
+
   public:
-    static MiniPID& getOnBrewPID() {
-      static MiniPID onBrewPID(0, 0, 0);
+    static PID& getOnBrewPID() {
+      static PID onBrewPID;
       return onBrewPID;
     };
-    static MiniPID& getOffBrewPID() {
-      static MiniPID offBrewPID(0, 0, 0);
+    static PID& getOffBrewPID() {
+      static PID offBrewPID;
       return offBrewPID;
     };
+    // static PID& offBrewPID;
+    // static PID& onBrewPID;
   private:
-    PIDGroup() = default;
-    ~PIDGroup() = default;
+    
+    PIDGroupSingleton() = default;
+    ~PIDGroupSingleton() = default;
   };
+
 }
 
-void allPIDsInit() {
-  offBrewPIDInit();
-  onBrewPIDInit();
+void myPIDsInit() {
+  initOnBrewPID();
+  initOffBrewPID();
 }
 
-void allPIDsReset() {
-  PIDGroup::getOffBrewPID().reset();
-  PIDGroup::getOnBrewPID().reset();
+
+void initOnBrewPID() {
+
+  float dt = HEAT_BREW_TIME_INTERVAL;
+  float min = 0.f;
+  float max = PID_TIME_WINDOW_SIZE;
+  float Kp = 0.5f;
+  float Ki = 0.f;
+  float Kd = 0.f;
+
+  PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
+  PIDGroupSingleton::getOnBrewPID().SetOutputLimits(min, max);
+  PIDGroupSingleton::getOnBrewPID().SetSampleTime(dt);
 }
 
-void offBrewPIDInit() {
-  MiniPID pid = PIDGroup::getOffBrewPID();
+void initOffBrewPID() {
+  float dt1 = HEAT_TIME_INTERVAL;
+  float min1 = 0.f;
+  float max1 = PID_TIME_WINDOW_SIZE;
+  float Kp1 = 0.f;
+  float Ki1 = 0.f;
+  float Kd1 = 0.f;
 
-  float offBrewP = 0.5;
-  float offBrewI = 0;
-  float offBrewD = 0;
-
-  pid.setPID(offBrewP, offBrewI, offBrewD);
-  pid.setOutputLimits(0, HEATER_POWER); // max 1s heat
+  PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
+  PIDGroupSingleton::getOffBrewPID().SetOutputLimits(min1, max1);
+  PIDGroupSingleton::getOffBrewPID().SetSampleTime(dt1);
 }
 
-void onBrewPIDInit() {
-  MiniPID pid = PIDGroup::getOnBrewPID();
-  
-  float onBrewP = 0.5;
-  float onBrewI = 0;
-  float onBrewD = 0;
 
-  pid.setPID(onBrewP, onBrewI, onBrewD);
-  pid.setOutputLimits(0, HEATER_POWER); // max 1s heat
+
+PID& getOnBrewPID() {
+  return PIDGroupSingleton::getOnBrewPID();
 }
 
-MiniPID& getOnBrewPID() {
-  return PIDGroup::getOnBrewPID();
+PID& getOffBrewPID() {
+  return PIDGroupSingleton::getOffBrewPID();
 }
-
-MiniPID& getOffBrewPID() {
-  return PIDGroup::getOffBrewPID();
-}
-
 
 float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
-  
-  if (coldWaterTemp == 0.f) {
-    coldWaterTemp = DEFAULT_COLD_WATER_TEMP;
+
+  if (coldWaterTemp < 20.f) {
+    coldWaterTemp = DEFAULT_GUARANTEE_TEMP_BREW;
   }
   float deltaHeat = 0.f;
   float deltaTemp = targetTemp - coldWaterTemp;
@@ -73,7 +79,7 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   float deltaWater = currentWaterPumped - heatState.lastWaterPumped;
   uint32_t currentWaterPumpedTimestamp = millis();
   int deltaTime = currentWaterPumpedTimestamp - heatState.lastWaterPumpedTimestamp;
-  if (deltaTime > timeInterval && deltaWater > 0 ) {
+  if (deltaTime >= timeInterval && deltaWater > 0) {
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
     float deltaHeat = deltaWater * deltaTemp * WATER_TEMP_RISE_POWER;
@@ -86,32 +92,35 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   return deltaHeat;
 }
 
-
-float computePIDAdjustEnergy(float targetTemp, MiniPID& pidController, const SensorState& currentState, HeatState& heatState, int timeInterval) {
-
-  float adjustEnergy = 0.f;
+// it's realtime job, cant't accumulate by time.
+float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState, int timeInterval) {
+  //reset the heat balance 
+  heatState.heatBalancePool = 0.f;
+  //do pid
+  float output = 0.f;
   float currentTemp = currentState.temperature;
-
-  uint32_t currentTimestamp = millis();
-  int deltaTime = currentTimestamp - heatState.lastPidAdjustTimestamp;
-  if (deltaTime > timeInterval) {
-    adjustEnergy = pidController.getOutput(currentTemp, targetTemp);
-    heatState.pidAdjustHeat = adjustEnergy;
-    heatState.lastPidAdjustTimestamp = currentTimestamp;
-    // add balance
-    heatState.heatBalancePool += adjustEnergy;
-  }
-
-  return adjustEnergy;
+  // uint32_t currentTimestamp = millis();
+  // int deltaTime = currentTimestamp - heatState.lastPidAdjustTimestamp;
+  // if (deltaTime >= timeInterval) {
+    output = pid.Compute(currentTemp, targetTemp);
+    heatState.lastPidAdjustTimestamp = millis();
+    if (millis() - pid.windowStartTime > PID_TIME_WINDOW_SIZE)
+    { //time to shift the Relay Window
+      pid.windowStartTime +=  PID_TIME_WINDOW_SIZE;
+    }
+    if (output <= millis() - pid.windowStartTime) turnOnBoiler(heatState);
+    else turnOffBoiler(heatState);
+  // }
+  return output;
 }
 
 
 float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval) {
   float energyWasted = 0.f;
   uint32_t currentTimestamp = millis();
-  
+
   int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-  if (deltaTime > timeInterval && heatState.lastBoilerState) {
+  if (deltaTime >= timeInterval && heatState.lastBoilerState) {
     energyWasted = HEATER_POWER * deltaTime * 0.001f;
     heatState.thermoHeaterWasted = energyWasted;
 
@@ -127,17 +136,25 @@ void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
 
   uint32_t currentTimestamp = millis();
   int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-  if (deltaTime > timeInterval) {
+  if (deltaTime >= timeInterval) {
     if (heatBalance <= 0) {
-      setBoilerOff();
-      heatState.lastBoilerStateTimestamp = millis();
-      heatState.lastBoilerState = false;
+      turnOffBoiler(heatState);
     }
     else {
-      setBoilerOn();
-      heatState.lastBoilerStateTimestamp = millis();
-      heatState.lastBoilerState = true;
+      turnOnBoiler(heatState);
     }
   }
-
 }
+
+void turnOnBoiler(HeatState& heatState){
+  setBoilerOn();
+  heatState.lastBoilerState = true;
+  heatState.lastBoilerStateTimestamp = millis();
+}
+
+void turnOffBoiler(HeatState& heatState){
+  setBoilerOff();
+  heatState.lastBoilerState = false;
+  heatState.lastBoilerStateTimestamp = millis();
+}
+

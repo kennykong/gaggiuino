@@ -101,8 +101,8 @@ void setup(void) {
 
   iwdcInit();
   
-  // PID Init
-  allPIDsInit();
+  myPIDsInit();
+  
 }
 
 //##############################################################################################################################
@@ -787,15 +787,15 @@ static void brewParamsReset(void) {
 }
 
 static void heatStatesReset(bool brewActive) {
-  setBoilerOff();
+  // setBoilerOff();
   // reset HeatState
   heatState.brewActive = brewActive;
   heatState.heatBalancePool = 0.f;
   heatState.lastBoilerState = false;
-  heatState.lastBoilerStateTimestamp = millis() - 1000;     //make sure trigger heat compute
-  heatState.lastPidAdjustTimestamp = millis() - 1000; 
+  heatState.lastBoilerStateTimestamp = millis();     //make sure trigger heat compute
+  heatState.lastPidAdjustTimestamp = millis(); 
   heatState.lastWaterPumped = 0.f;
-  heatState.lastWaterPumpedTimestamp = millis() - 1000;
+  heatState.lastWaterPumpedTimestamp = millis();
   heatState.pidAdjustHeat = 0.f;
   heatState.thermoCompensateHeat = 0.f;
   heatState.thermoHeaterWasted = 0.f;
@@ -897,10 +897,11 @@ static inline void sysHealthCheck(float pressureThreshold) {
   if (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f) {
     unsigned long currentTimer = millis();
     if (currentTimer >= systemHealthTimer - 3500ul && currentTimer <= systemHealthTimer - 500ul) {
-      int charSize = 25;
+      int charSize = 30;
       char tmp[charSize]= "Dropping beats in: ?";
-      int countdown = round((systemHealthTimer-currentTimer)*0.001f);
-      unsigned int check = snprintf(tmp, charSize, "Dropping beats in: %i", countdown);
+      int countdown = (int)((systemHealthTimer - currentTimer) * 0.001f);
+      // unsigned int check = snprintf(tmp, charSize, "Dropping beats in: %i", countdown);
+      snprintf(tmp, charSize, "Dropping beats in: %i", countdown);
       // if (check > 0 && check <= charSize) {
         lcdShowPopup(tmp);
       // }

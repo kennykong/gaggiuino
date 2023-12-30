@@ -38,7 +38,7 @@ void logProfile(Profile& profile) {
 void setup(void) {
   Serial.begin(115200);
 
-  // comms.setDebugPort(&Serial);
+  comms.setDebugPort(&Serial);  //debug
   UART_MCU.begin(460800);
   comms.begin(UART_MCU);
 

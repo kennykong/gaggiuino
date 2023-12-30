@@ -14,11 +14,11 @@
 //**********************************
 //Constructor functions
 //**********************************
-MiniPID::MiniPID(float p, float i, float d){
+MiniPID::MiniPID(double p, double i, double d){
 	init();
 	P=p; I=i; D=d;
 }
-MiniPID::MiniPID(float p, float i, float d, float f){
+MiniPID::MiniPID(double p, double i, double d, double f){
 	init();
 	P=p; I=i; D=d; F=f;
 }
@@ -56,7 +56,7 @@ void MiniPID::init(){
  *
  * @param p Proportional gain. Affects output according to <b>output+=P*(setpoint-current_value)</b>
  */
-void MiniPID::setP(float p){
+void MiniPID::setP(double p){
 	P=p;
 	checkSigns();
 }
@@ -67,11 +67,11 @@ void MiniPID::setP(float p){
  * Typically tuned second for "Position" based modes, and third for "Rate" or continuous based modes. <br>
  * Affects output through <b>output+=previous_errors*Igain ;previous_errors+=current_error</b>
  * 
- * @see {@link #setMaxIOutput(float) setMaxIOutput} for how to restrict
+ * @see {@link #setMaxIOutput(double) setMaxIOutput} for how to restrict
  *
  * @param i New gain value for the Integral term
  */
-void MiniPID::setI(float i){
+void MiniPID::setI(double i){
 	if(I!=0){
 		errorSum=errorSum*I/i;
 		}
@@ -88,7 +88,7 @@ void MiniPID::setI(float i){
 	 */
 } 
 
-void MiniPID::setD(float d){
+void MiniPID::setD(double d){
 	D=d;
 	checkSigns();
 }
@@ -100,7 +100,7 @@ void MiniPID::setD(float d){
  * 
  * @param f Feed forward gain. Affects output according to <b>output+=F*Setpoint</b>;
  */
-void MiniPID::setF(float f){
+void MiniPID::setF(double f){
 	F=f;
 	checkSigns();
 }
@@ -110,12 +110,12 @@ void MiniPID::setF(float f){
  * @param i Integral gain.	Becomes large if setpoint cannot reach target quickly. 
  * @param d Derivative gain. Responds quickly to large changes in error. Small values prevents P and I terms from causing overshoot.
  */
-void MiniPID::setPID(float p, float i, float d){
+void MiniPID::setPID(double p, double i, double d){
 	P=p;I=i;D=d;
 	checkSigns();
 }
 
-void MiniPID::setPID(float p, float i, float d,float f){
+void MiniPID::setPID(double p, double i, double d,double f){
 	P=p;I=i;D=d;F=f;
 	checkSigns();
 }
@@ -124,7 +124,7 @@ void MiniPID::setPID(float p, float i, float d,float f){
  * this->can be used to prevent large windup issues and make tuning simpler
  * @param maximum. Units are the same as the expected output value
  */
-void MiniPID::setMaxIOutput(float maximum){
+void MiniPID::setMaxIOutput(double maximum){
 	/* Internally maxError and Izone are similar, but scaled for different purposes. 
 	 * The maxError is generated for simplifying math, since calculations against 
 	 * the max error are far more common than changing the I term or Izone. 
@@ -139,14 +139,14 @@ void MiniPID::setMaxIOutput(float maximum){
  * set to (-maximum).
  * @param output 
  */
-void MiniPID::setOutputLimits(float output){ setOutputLimits(-output,output);}
+void MiniPID::setOutputLimits(double output){ setOutputLimits(-output,output);}
 
 /**
  * Specify a maximum output.
  * @param minimum possible output value
  * @param maximum possible output value
  */
-void MiniPID::setOutputLimits(float minimum,float maximum){
+void MiniPID::setOutputLimits(double minimum,double maximum){
 	if(maximum<minimum)return;
 	maxOutput=maximum;
 	minOutput=minimum;
@@ -171,7 +171,7 @@ void MiniPID::setDirection(bool reversed){
 /**Set the target for the PID calculations
  * @param setpoint
  */
-void MiniPID::setSetpoint(float setpoint){
+void MiniPID::setSetpoint(double setpoint){
 	this->setpoint=setpoint;
 } 
 
@@ -181,12 +181,12 @@ void MiniPID::setSetpoint(float setpoint){
 * @param target The target value
 * @return calculated output value for driving the actual to the target 
 */
-float MiniPID::getOutput(float actual, float setpoint){
-	float output;
-	float Poutput;
-	float Ioutput;
-	float Doutput;
-	float Foutput;
+double MiniPID::getOutput(double actual, double setpoint){
+	double output;
+	double Poutput;
+	double Ioutput;
+	double Doutput;
+	double Foutput;
 
 	this->setpoint=setpoint;
 
@@ -196,7 +196,7 @@ float MiniPID::getOutput(float actual, float setpoint){
 	}
 
 	//Do the simple parts of the calculations
-	float error=setpoint-actual;
+	double error=setpoint-actual;
 
 	//Calculate F output. Notice, this->depends only on the setpoint, and not the error. 
 	Foutput=F*setpoint;
@@ -274,7 +274,7 @@ float MiniPID::getOutput(float actual, float setpoint){
  * Calculates the PID value using the last provided setpoint and actual valuess
  * @return calculated output value for driving the actual to the target 
  */
-float MiniPID::getOutput(){
+double MiniPID::getOutput(){
 	return getOutput(lastActual,setpoint);
 }
 
@@ -283,7 +283,7 @@ float MiniPID::getOutput(){
  * @param actual
  * @return calculated output value for driving the actual to the target 
  */
-float MiniPID::getOutput(float actual){
+double MiniPID::getOutput(double actual){
 	return getOutput(actual,setpoint);
 }
 	
@@ -298,7 +298,7 @@ void MiniPID::reset(){
 /**Set the maximum rate the output can increase per cycle. 
  * @param rate
  */
-void MiniPID::setOutputRampRate(float rate){
+void MiniPID::setOutputRampRate(double rate){
 	outputRampRate=rate;
 }
 
@@ -308,7 +308,7 @@ void MiniPID::setOutputRampRate(float rate){
  * during large setpoint adjustments. Increases lag and I term if range is too small.
  * @param range
  */
-void MiniPID::setSetpointRange(float range){
+void MiniPID::setSetpointRange(double range){
 	setpointRange=range;
 }
 
@@ -318,7 +318,7 @@ void MiniPID::setSetpointRange(float range){
  * <pre>output*(1-strength)*sum(0..n){output*strength^n}</pre>
  * @param output valid between [0..1), meaning [current output only.. historical output only)
  */
-void MiniPID::setOutputFilter(float strength){
+void MiniPID::setOutputFilter(double strength){
 	if(strength==0 || bounded(strength,0,1)){
 		outputFilter=strength;
 	}
@@ -335,7 +335,7 @@ void MiniPID::setOutputFilter(float strength){
  * @param max minimum value in range
  * @return Value if it's within provided range, min or max otherwise 
  */
-float MiniPID::clamp(float value, float min, float max){
+double MiniPID::clamp(double value, double min, double max){
 	if(value > max){ return max;}
 	if(value < min){ return min;}
 	return value;
@@ -348,7 +348,7 @@ float MiniPID::clamp(float value, float min, float max){
  * @param max Maximum value of range
  * @return
  */
-bool MiniPID::bounded(float value, float min, float max){
+bool MiniPID::bounded(double value, double min, double max){
 		return (min<value) && (value<max);
 }
 

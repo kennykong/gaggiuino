@@ -3,31 +3,27 @@
 #include "../lcd/lcd.h"
 
 extern unsigned long steamTime;
-// inline static float TEMP_DELTA(float d) { return (d*DELTA_RANGE); }
-inline static float TEMP_DELTA(float d, const SensorState &currentState) {
-  return (
-    d * (currentState.pumpFlow < 1.f
-      ? currentState.pumpFlow / 7.f
-      : currentState.pumpFlow / 5.f
-    )
-  );
-}
+
 
 void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive) {
   lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
   float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint;
-  MiniPID offBrewPid = getOffBrewPID();
-  MiniPID onBrewPid = getOnBrewPID();
+  PID& offBrewPid = getOffBrewPID();
+  PID& onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
+  
     computeThermoCompensateEnergy(0, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
-    computePIDAdjustEnergy(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
-    computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
-    driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
-  } else { //if brewState == false
-    computePIDAdjustEnergy(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
-    computeHeaterWastedEnergy(heatState, HEAT_TIME_INTERVAL);
-    driveHeaterByEnergyBalance(heatState, HEAT_TIME_INTERVAL);
+    if (heatState.heatBalancePool > 0.f) {
+      computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
+      driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
+    }
+    else {
+      doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+    }
+  }
+  else { //if brewState == false
+    doPIDAdjust(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
   }
   if (brewActive || !currentState.brewSwitchState) { // keep steam boiler supply valve open while steaming/descale only
     setSteamValveRelayOff();
