@@ -16,13 +16,14 @@
 #include <Arduino.h>
 
 
-const float HEATER_POWER = 1200.f;            // Gaggia Classic Pro (MODEL: RI9480/SIN035UR) is 1200 Watt
+const float HEATER_POWER = 1150.f;            // Gaggia Classic Pro (MODEL: RI9480/SIN035UR) is acually about 1150 Watt
 const float WATER_TEMP_RISE_POWER = 4.2f;     // 1ml water rise 1C need 4.2 Joule == 4.2 Watt*Second
-const float DEFAULT_GUARANTEE_TEMP = 86.f;   // Default is the lowest guarantee temp
+const float DEFAULT_GUARANTEE_TEMP = 80.f;   // Default is the lowest guarantee temp
 const float DEFAULT_GUARANTEE_TEMP_BREW = 88.f;   // Default is the lowest guarantee temp
-const int HEAT_TIME_INTERVAL = 50;            // ms
+const float COLD_WATER_TEMP = 20.f;           // Default is the avarage air temp of year, maybe read by sensor later.
+const int HEAT_TIME_INTERVAL = 100;            // ms
 const int HEAT_BREW_TIME_INTERVAL = 10;       // ms
-const int PID_TIME_WINDOW_SIZE = 1000;        // ms
+const int MAX_BOILER_ON_TIME = 1000;        // ms
 
 
 void myPIDsInit();
@@ -38,6 +39,8 @@ PID& getOffBrewPID();
 float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
 
 float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState, int timeInterval);
+
+void pulseHeaters(HeatState& heatState);
 
 float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval);
 

@@ -35,10 +35,10 @@ public:
   // Kp -  proportional gain
   // Ki -  Integral gain
   // Kd -  derivative gain
-  PID(float dt, float min, float max, float Kp, float Ki, float Kd);
+  PID(double dt, double min, double max, double Kp, double Ki, double Kd);
 
   // Returns the manipulated variable given a setpoint and current process value
-  float calculate(float currentValue, float setPoint);
+  double calculate(double currentValue, double setPoint);
 
   //for relay on-off use
   uint32_t windowStartTime;

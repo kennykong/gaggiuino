@@ -32,27 +32,27 @@ using namespace std;
 class PIDImpl
 {
 public:
-  PIDImpl(float dt, float min, float max, float Kp, float Ki, float Kd);
+  PIDImpl(double dt, double min, double max, double Kp, double Ki, double Kd);
   ~PIDImpl();
-  float calculate(float currentValue, float setPoint);
+  double calculate(double currentValue, double setPoint);
 
 private:
-  float _dt;
-  float _min;
-  float _max;
-  float _Kp;
-  float _Ki;
-  float _Kd;
-  float _pre_error;
-  float _integral;
+  double _dt;
+  double _min;
+  double _max;
+  double _Kp;
+  double _Ki;
+  double _Kd;
+  double _pre_error;
+  double _integral;
 };
 
 
-PID::PID(float dt, float min, float max, float Kp, float Ki, float Kd) {
+PID::PID(double dt, double min, double max, double Kp, double Ki, double Kd) {
   pimpl = new PIDImpl(dt, min, max, Kp, Ki, Kd);
   windowStartTime = millis();
 }
-float PID::calculate(float currentValue, float setPoint) {
+double PID::calculate(double currentValue, double setPoint) {
   return pimpl->calculate(currentValue, setPoint);
 }
 PID::~PID() = default;
@@ -61,7 +61,7 @@ PID::~PID() = default;
 /**
  * Implementation
  */
-PIDImpl::PIDImpl(float dt, float min, float max, float Kp, float Ki, float Kd) :
+PIDImpl::PIDImpl(double dt, double min, double max, double Kp, double Ki, double Kd) :
   _dt(dt),
   _min(min),
   _max(max),
@@ -72,28 +72,28 @@ PIDImpl::PIDImpl(float dt, float min, float max, float Kp, float Ki, float Kd) :
   _integral(0.f) {
 }
 
-float PIDImpl::calculate(float currentValue, float setPoint) {
+double PIDImpl::calculate(double currentValue, double setPoint) {
 
   // Calculate error
-  float error = setPoint - currentValue;
+  double error = setPoint - currentValue;
 
   // Proportional term
-  float Pout = _Kp * error;
+  double Pout = _Kp * error;
 
   // Integral term
   _integral += error * _dt;
-  float Iout = _Ki * _integral;
+  double Iout = _Ki * _integral;
 
   // Derivative term
-  float derivative = 0;
+  double derivative = 0;
   if(_dt != 0) {
      derivative = (error - _pre_error) / _dt;
   }
   
-  float Dout = _Kd * derivative;
+  double Dout = _Kd * derivative;
 
   // Calculate total output
-  float output = Pout + Iout + Dout;
+  double output = Pout + Iout + Dout;
 
   // Restrict to max/min
   if (output > _max)

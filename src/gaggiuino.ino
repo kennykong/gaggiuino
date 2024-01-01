@@ -312,7 +312,7 @@ static void modeSelect(void) {
       nonBrewModeActive = true;
       if (!currentState.steamSwitchState) steamTime = millis();
       backFlush(currentState);
-      brewActive ? setBoilerOff() : justDoCoffeeBetter(runningCfg, currentState, heatState, false);
+      brewActive ? turnOffBoiler(heatState) : justDoCoffeeBetter(runningCfg, currentState, heatState, false);
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
@@ -864,7 +864,7 @@ static inline void sysHealthCheck(float pressureThreshold) {
   if (millis() >= systemHealthTimer) {
     while (currentState.smoothedPressure >= pressureThreshold && currentState.temperature < 100.f)
     {
-      //Reloading the watchdog timer, if this function fails to run MCU is rebooted
+      //Reloading the watchdog timer, if this function fails to run, MCU is rebooted
       watchdogReload();
       switch (lcdCurrentPageId) {
         case NextionPage::BrewManual:
@@ -880,7 +880,8 @@ static inline void sysHealthCheck(float pressureThreshold) {
           sensorsRead();
           lcdShowPopup("Releasing pressure!");
           setPumpOff();
-          setBoilerOff();
+          // setBoilerOff();
+          turnOffBoiler(heatState);
           setSteamValveRelayOff();
           setSteamBoilerRelayOff();
           openValve();

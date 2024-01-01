@@ -8,23 +8,42 @@ extern unsigned long steamTime;
 void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive) {
   lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
   float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint;
+  float currentTemp = currentState.temperature;
   PID& offBrewPid = getOffBrewPID();
   PID& onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
-  
-    computeThermoCompensateEnergy(0, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
-    if (heatState.heatBalancePool > 0.f) {
-      computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
-      driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
+    // hard limit temp 88-98 C
+    if (currentTemp < 90.f) {
+      turnOnBoiler(heatState);
+    }
+    else if (currentTemp > 95.f) {
+      turnOffBoiler(heatState);
     }
     else {
-      doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+      computeThermoCompensateEnergy(COLD_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+      if (heatState.heatBalancePool > 0.f) {
+        computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
+        driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
+      }
+      else {
+        doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+      }
     }
   }
   else { //if brewState == false
-    doPIDAdjust(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
+    // hard limit temp 80-100 C
+    if (currentTemp < 80.f) {
+      turnOnBoiler(heatState);
+    }
+    else if (currentTemp > 100.f) {
+      turnOffBoiler(heatState);
+    }
+    else {
+      doPIDAdjust(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
+    }
   }
+
   if (brewActive || !currentState.brewSwitchState) { // keep steam boiler supply valve open while steaming/descale only
     setSteamValveRelayOff();
   }

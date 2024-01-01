@@ -13,6 +13,7 @@ struct HeatState {
   float heatBalancePool;                // Unit is Joule == Watt*Second
   float pidAdjustHeat;                  // PID heat caculate, Unit is Joule
   uint32_t lastPidAdjustTimestamp;      // mills
+  double pidOutput;                      // pid out, how many milis boiler on in 1 second
   float thermoCompensateHeat;           // Thermo Compensation heat caculate, Unit is Joule
   float thermoHeaterWasted;             // Unit is Joule
   

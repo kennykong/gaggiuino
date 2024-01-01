@@ -17,7 +17,7 @@
  *    The parameters specified here are those for for which we can't set up
  *    reliable defaults, so we need to have the user set them.
  ***************************************************************************/
-PID::PID(float Kp, float Ki, float Kd, int POn, int ControllerDirection)
+PID::PID(double Kp, double Ki, double Kd, int POn, int ControllerDirection)
 {
     // myOutput = Output;
     // myInput = Input;
@@ -39,13 +39,13 @@ PID::PID(float Kp, float Ki, float Kd, int POn, int ControllerDirection)
  *    To allow backwards compatability for v1.1, or for people that just want
  *    to use Proportional on Error without explicitly saying so
  ***************************************************************************/
-PID::PID(float Kp, float Ki, float Kd, int ControllerDirection)
+PID::PID(double Kp, double Ki, double Kd, int ControllerDirection)
     :PID::PID(Kp, Ki, Kd, P_ON_E, ControllerDirection)
 {
 
 }
 
-PID::PID(float Kp, float Ki, float Kd)
+PID::PID(double Kp, double Ki, double Kd)
   :PID::PID(Kp, Ki, Kd, P_ON_E, DIRECT) {
 }
 
@@ -59,17 +59,17 @@ PID::PID()
  *   pid Output needs to be computed.  returns true when the output is computed,
  *   false when nothing has been done.
  **********************************************************************************/
-float PID::Compute(float current_value, float setpoint)
+double PID::Compute(double current_value, double setpoint)
 {
-  float myOutput = 0.f;
+  double myOutput = -1.f;
   unsigned long now = millis();
   unsigned long timeChange = (now - lastTime);
   if (timeChange >= SampleTime)
   {
     /*Compute all the working error variables*/
-    float input = current_value;
-    float error = setpoint - input;
-    float dInput = (input - lastInput);
+    double input = current_value;
+    double error = setpoint - input;
+    double dInput = (input - lastInput);
     outputSum += (ki * error);
 
     /*Add Proportional on Measurement, if P_ON_M is specified*/
@@ -79,7 +79,7 @@ float PID::Compute(float current_value, float setpoint)
     else if (outputSum < outMin) outputSum = outMin;
 
     /*Add Proportional on Error, if P_ON_E is specified*/
-    float output;
+    double output;
     if (pOnE) output = kp * error;
     else output = 0;
 
@@ -106,7 +106,7 @@ float PID::Compute(float current_value, float setpoint)
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(float Kp, float Ki, float Kd, int POn)
+void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
 
@@ -115,7 +115,7 @@ void PID::SetTunings(float Kp, float Ki, float Kd, int POn)
 
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
-   float SampleTimeInSec = ((float)SampleTime)/1000;
+   double SampleTimeInSec = ((double)SampleTime)/1000;
    kp = Kp;
    ki = Ki * SampleTimeInSec;
    kd = Kd / SampleTimeInSec;
@@ -133,7 +133,7 @@ void PID::SetTunings(float Kp, float Ki, float Kd, int POn)
 /* SetTunings(...)*************************************************************
  * Set Tunings using the last-rembered POn setting
  ******************************************************************************/
-void PID::SetTunings(float Kp, float Ki, float Kd)
+void PID::SetTunings(double Kp, double Ki, double Kd)
 {
    SetTunings(Kp, Ki, Kd, P_ON_E);
 }
@@ -145,8 +145,8 @@ void PID::SetSampleTime(int NewSampleTime)
 {
    if (NewSampleTime > 0)
    {
-      float ratio  = (float)NewSampleTime
-                      / (float)SampleTime;
+      double ratio  = (double)NewSampleTime
+                      / (double)SampleTime;
       ki *= ratio;
       kd /= ratio;
       SampleTime = (unsigned long)NewSampleTime;
@@ -161,7 +161,7 @@ void PID::SetSampleTime(int NewSampleTime)
  *  want to clamp it from 0-125.  who knows.  at any rate, that can all be done
  *  here.
  **************************************************************************/
-void PID::SetOutputLimits(float Min, float Max)
+void PID::SetOutputLimits(double Min, double Max)
 {
    if(Min >= Max) return;
    outMin = Min;
@@ -226,9 +226,9 @@ void PID::SetControllerDirection(int Direction)
  * functions query the internal state of the PID.  they're here for display
  * purposes.  this are the functions the PID Front-end uses for example
  ******************************************************************************/
-float PID::GetKp(){ return  dispKp; }
-float PID::GetKi(){ return  dispKi;}
-float PID::GetKd(){ return  dispKd;}
+double PID::GetKp(){ return  dispKp; }
+double PID::GetKi(){ return  dispKi;}
+double PID::GetKd(){ return  dispKd;}
 // int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
 
