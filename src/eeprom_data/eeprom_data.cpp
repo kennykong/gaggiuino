@@ -94,7 +94,7 @@ namespace {
     defaultData.basketPrefill = false;
     // System settings
     defaultData.steamSetPoint = 155;
-    defaultData.offsetTemp = 7;
+    defaultData.offsetTemp = 0;
     defaultData.hpwr = 550;
     defaultData.mainDivider = 5;
     defaultData.brewDivider = 3;
