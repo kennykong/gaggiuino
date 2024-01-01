@@ -13,7 +13,7 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
   PID& onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
-    // hard limit temp 88-93.5 C
+    // if brew temp is 93 C, hard limit temp 88-93.5 C
     if (currentTemp < brewTempSetPoint - 5.f) {
       turnOnBoiler(heatState);
     }
@@ -32,7 +32,7 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     }
   }
   else { //if brewState == false
-    // hard limit temp 80-100 C
+    // if brew temp is 93 C, hard limit temp 80-100 C
     if (currentTemp < brewTempSetPoint - 13.f) {
       turnOnBoiler(heatState);
     }
