@@ -61,7 +61,7 @@ PID::PID()
  **********************************************************************************/
 double PID::Compute(double current_value, double setpoint)
 {
-  double myOutput = -1.f;
+  double myOutput = outMin - 1.0; //default pid output unavailiable
   unsigned long now = millis();
   unsigned long timeChange = (now - lastTime);
   if (timeChange >= SampleTime)
@@ -75,6 +75,7 @@ double PID::Compute(double current_value, double setpoint)
     /*Add Proportional on Measurement, if P_ON_M is specified*/
     if (!pOnE) outputSum -= kp * dInput;
 
+    /*last outputSum regulation*/
     if (outputSum > outMax) outputSum = outMax;
     else if (outputSum < outMin) outputSum = outMin;
 
@@ -232,3 +233,14 @@ double PID::GetKd(){ return  dispKd;}
 // int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
 
+double PID::GetOutMax() {
+  return outMax;
+}
+
+double PID::GetOutMin() {
+  return outMin;
+}
+
+bool PID::IsPOnE() {
+  return pOnE;
+}

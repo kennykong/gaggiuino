@@ -757,7 +757,7 @@ static void brewDetect(void) {
       brewParamsReset();
       paramsReset = true;
       brewActive = true;
-      heatStatesReset(brewActive);
+      themoCompHeatStatesReset(brewActive);
     }
     // needs to be here as it creates a locking state soemtimes if not kept up to date during brew
     // mainly when shotWeight restriction kick in.
@@ -767,7 +767,7 @@ static void brewDetect(void) {
     currentState.pumpClicks = getAndResetClickCounter();
     if (paramsReset) {
       brewParamsReset();
-      heatStatesReset(brewActive);
+      themoCompHeatStatesReset(brewActive);
       paramsReset = false;
     }
   }
@@ -788,20 +788,10 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-static void heatStatesReset(bool brewActive) {
-  // setBoilerOff();
+static void themoCompHeatStatesReset(bool brewActive) {
   // reset HeatState
   heatState.brewActive = brewActive;
-  heatState.heatBalancePool = 0.f;
-  heatState.lastBoilerState = false;
-  heatState.lastBoilerStateTimestamp = millis();     //make sure trigger heat compute
-  heatState.lastPidAdjustTimestamp = millis(); 
-  heatState.lastWaterPumped = 0.f;
-  heatState.lastWaterPumpedTimestamp = millis();
-  heatState.pidAdjustHeat = 0.f;
-  heatState.thermoCompensateHeat = 0.f;
-  heatState.thermoHeaterWasted = 0.f;
-
+  resetThemoCompState(heatState);
 }
 
 static bool sysReadinessCheck(void) {
@@ -872,11 +862,11 @@ static inline void sysHealthCheck(float pressureThreshold) {
         case NextionPage::BrewManual:
         case NextionPage::BrewGraph:
         case NextionPage::GraphPreview:
-          brewDetect();
-          lcdRefresh();
           lcdListen();
           sensorsRead();
+          brewDetect();
           justDoCoffeeBetter(runningCfg, currentState, heatState, brewActive);
+          lcdRefresh();
           break;
         default:
           sensorsRead();

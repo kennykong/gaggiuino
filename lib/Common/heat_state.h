@@ -5,18 +5,19 @@
 
 struct HeatState {
 
-  bool brewActive;                      // Only when brewing, thermoCompensateHeat is caculated, otherwize only uses pidAdjustHeat
-  bool lastBoilerState;                 // false is OFF, true is ON
-  uint32_t lastBoilerStateTimestamp;    // mills
-  float lastWaterPumped;                // ml or g
-  uint32_t lastWaterPumpedTimestamp;    // mills
-  float heatBalancePool;                // Unit is Joule == Watt*Second
-  float pidAdjustHeat;                  // PID heat caculate, Unit is Joule
-  uint32_t lastPidAdjustTimestamp;      // mills
-  double pidOutput;                      // pid out, how many milis boiler on in 1 second
-  float thermoCompensateHeat;           // Thermo Compensation heat caculate, Unit is Joule
-  float thermoHeaterWasted;             // Unit is Joule
-  
+  bool brewActive;                          // Only when brewing, thermoCompensateHeat is caculated, otherwize only uses pidAdjustHeat
+  bool lastBoilerState;                     // false is OFF, true is ON
+  uint32_t lastBoilerStateTimestamp;        // mills
+  float lastWaterPumped;                    // ml or g
+  uint32_t lastWaterPumpedTimestamp;        // mills
+  float heatBalancePool;                    // Unit is Joule == Watt*Second
+  // float pidAdjustHeat;                   // PID heat caculate, Unit is Joule
+  uint32_t lastPidOutputTimestamp;          // mills
+  double pidOutput;                         // pid out, how many milis boiler on in 1 second, no need to reset when brew on-off
+  float lastThermoCompensateHeat;           // Thermo Compensation heat caculate, Unit is Joule
+  float lastThermoHeaterWasted;             // Unit is Joule
+  bool isBoilerOperatorTC;                  // Who operate the boiler, true is Thermo Compensation, false is PID or other.
+
 };
 
 #endif

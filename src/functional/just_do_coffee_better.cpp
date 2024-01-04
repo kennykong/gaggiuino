@@ -13,30 +13,34 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
   PID& onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
-    // if brew temp is 92 C, hard limit temp 88-92.5 C
-    if (currentTemp < brewTempSetPoint - 4.f) {
+    // if brew temp is 92 C, hard limit temp 89 -92.5 C, this is good for pid overshoot, but prone to undershoot
+    // after turing PID, add this limit.
+    // gaggia boiler system inertia is less than 3C
+    if (currentTemp < brewTempSetPoint - 3.f) {
       turnOnBoiler(heatState);
     }
-    else if (currentTemp > brewTempSetPoint + 0.5f) {
+    else if (currentTemp > brewTempSetPoint + 0.5f) { 
       turnOffBoiler(heatState);
     }
     else {
-      computeThermoCompensateEnergy(COLD_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+      computeThermoCompensateEnergy(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
       if (heatState.heatBalancePool > 0.f) {
         computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
         driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
       }
       else {
+        //reset the heat balance 
+        heatState.heatBalancePool = 0.f;
         doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
       }
     }
   }
   else { //if brewState == false
-    // if brew temp is 92 C, hard limit temp 84-97 C
-    if (currentTemp < brewTempSetPoint - 8.f) {
+    // if brew temp is 92 C, hard limit temp 82-95 C
+    if (currentTemp < brewTempSetPoint - 10.f) {
       turnOnBoiler(heatState);
     }
-    else if (currentTemp > brewTempSetPoint + 5.f) {
+    else if (currentTemp > brewTempSetPoint + 3.f) {
       turnOffBoiler(heatState);
     }
     else {

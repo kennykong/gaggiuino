@@ -64,6 +64,12 @@ class PID
 	int GetDirection();					//
   unsigned long windowStartTime;
 
+  double GetOutMax();
+  double GetOutMin();
+
+  bool IsPOnE();
+
+
   private:
 	void Initialize();
 	
@@ -76,7 +82,7 @@ class PID
   double kd;                   // * (D)erivative Tuning Parameter
 
 	int controllerDirection;
-	int pOn;
+  int pOn;                     // * Proportional on Error (default) OR Proportional on Measurement
 
   // double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
   // double *myOutput;             //   This creates a hard link between the variables and the 
@@ -88,7 +94,7 @@ class PID
 
 	unsigned long SampleTime;
 	double outMin, outMax;
-	bool pOnE;
+	bool pOnE;                        // * Proportional on Error (default) OR Proportional on Measurement
 };
 #endif
 

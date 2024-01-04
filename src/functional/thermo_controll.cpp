@@ -35,7 +35,7 @@ void initOnBrewPID() {
   float min = 0.f;
   float max = MAX_BOILER_ON_TIME;
   float Kp = 300.f;
-  float Ki = 20.f;
+  float Ki = 12.f;
   float Kd = 0.f;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
@@ -47,8 +47,8 @@ void initOffBrewPID() {
   float dt1 = HEAT_TIME_INTERVAL;
   float min1 = 0.f;
   float max1 = MAX_BOILER_ON_TIME;
-  float Kp1 = 50.f;
-  float Ki1 = 1.6f;
+  float Kp1 = 45.f;
+  float Ki1 = 1.8f;
   float Kd1 = 0.f;
 
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
@@ -56,6 +56,17 @@ void initOffBrewPID() {
   PIDGroupSingleton::getOffBrewPID().SetSampleTime(dt1);
 }
 
+void resetThemoCompState(HeatState& heatState) {
+  
+  // reset ThemoComp HeatState
+  heatState.heatBalancePool = 0.f;
+  heatState.lastWaterPumped = 0.f;
+  heatState.lastWaterPumpedTimestamp = millis();
+  heatState.lastThermoCompensateHeat = 0.f;
+  heatState.lastThermoHeaterWasted = 0.f;
+  // turnOffBoiler(heatState);  // not necessary
+
+}
 
 
 PID& getOnBrewPID() {
@@ -78,7 +89,7 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
     float deltaHeat = deltaWater * deltaTemp * WATER_TEMP_RISE_POWER;
-    heatState.thermoCompensateHeat = deltaHeat;
+    heatState.lastThermoCompensateHeat = deltaHeat;
 
     // add balance
     heatState.heatBalancePool += deltaHeat;
@@ -87,21 +98,55 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   return deltaHeat;
 }
 
+float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval) {
+  float energyWasted = 0.f;
+  bool isMyOperation = heatState.isBoilerOperatorTC;
+  if (isMyOperation) {
+    uint32_t currentTimestamp = millis();
+    int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
+    if (deltaTime >= timeInterval && heatState.lastBoilerState) {
+      energyWasted = HEATER_POWER * deltaTime * 0.001f;
+      heatState.lastThermoHeaterWasted = energyWasted;
+
+      // reduce balance
+      heatState.heatBalancePool -= energyWasted;
+    }
+  }
+  return energyWasted;
+}
+
+void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
+  float heatBalance = heatState.heatBalancePool;
+
+  uint32_t currentTimestamp = millis();
+  int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
+  if (deltaTime >= timeInterval) {
+    bool isBoilerOperatorTC = true;
+    if (heatBalance <= 0) {
+      turnOffBoiler(heatState, isBoilerOperatorTC);
+    }
+    else {
+      turnOnBoiler(heatState, isBoilerOperatorTC);
+    }
+  }
+}
+
 // it's realtime job, cant't accumulate by time.
 float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState, int timeInterval) {
-  //reset the heat balance 
-  heatState.heatBalancePool = 0.f;
+  
   //do pid
-  float output = 0.f;
-  float currentTemp = currentState.temperature;
-
-  output = pid.Compute(currentTemp, targetTemp);
-  if (output >= 0) {
-    heatState.lastPidAdjustTimestamp = millis();
+  float outMin = pid.GetOutMin();
+  //init a illegal output
+  float output = outMin -1.f;
+  //compute output
+  output = pid.Compute(currentState.temperature, targetTemp);
+  //only if output is legal, update the heatState's output to new value
+  if (output >= outMin) {
+    heatState.lastPidOutputTimestamp = millis();
     heatState.pidOutput = output;
   }
+  //heat boiler use the latest output
   pulseHeaters(heatState);
-
   return output;
 }
 
@@ -118,46 +163,25 @@ void pulseHeaters(HeatState& heatState) {
 }
 
 
-float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval) {
-  float energyWasted = 0.f;
-  uint32_t currentTimestamp = millis();
-
-  int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-  if (deltaTime >= timeInterval && heatState.lastBoilerState) {
-    energyWasted = HEATER_POWER * deltaTime * 0.001f;
-    heatState.thermoHeaterWasted = energyWasted;
-
-    // deduct balance
-    heatState.heatBalancePool -= energyWasted;
-  }
-  return energyWasted;
-}
-
-
-void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
-  float heatBalance = heatState.heatBalancePool;
-
-  uint32_t currentTimestamp = millis();
-  int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-  if (deltaTime >= timeInterval) {
-    if (heatBalance <= 0) {
-      turnOffBoiler(heatState);
-    }
-    else {
-      turnOnBoiler(heatState);
-    }
-  }
-}
-
-void turnOnBoiler(HeatState& heatState){
+void turnOnBoiler(HeatState& heatState, bool isBoilerOperatorTC){
   setBoilerOn();
   heatState.lastBoilerState = true;
   heatState.lastBoilerStateTimestamp = millis();
+  heatState.isBoilerOperatorTC = isBoilerOperatorTC;
 }
 
-void turnOffBoiler(HeatState& heatState){
+void turnOffBoiler(HeatState& heatState, bool isBoilerOperatorTC){
   setBoilerOff();
   heatState.lastBoilerState = false;
   heatState.lastBoilerStateTimestamp = millis();
+  heatState.isBoilerOperatorTC = isBoilerOperatorTC;
+}
+
+void turnOnBoiler(HeatState& heatState) {
+  turnOnBoiler(heatState, false);
+}
+
+void turnOffBoiler(HeatState& heatState) {
+  turnOffBoiler(heatState, false);
 }
 
