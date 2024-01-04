@@ -1,13 +1,13 @@
 /* 09:32 15/03/2023 - change triggering comment */
-#ifndef JUST_DO_COFFEE_H
-#define JUST_DO_COFFEE_H
+// #ifndef JUST_DO_COFFEE_H
+// #define JUST_DO_COFFEE_H
 
-#include "utils.h"
-#include "../peripherals/peripherals.h"
-#include "../peripherals/pump.h"
-#include "../eeprom_data/eeprom_data.h"
-#include "sensors_state.h"
-#include <Arduino.h>
+// #include "utils.h"
+// #include "../peripherals/peripherals.h"
+// #include "../peripherals/pump.h"
+// #include "../eeprom_data/eeprom_data.h"
+// #include "sensors_state.h"
+// #include <Arduino.h>
 
 
 // const uint32_t STEAM_TIMEOUT = 900000UL; // steam mode timeout

@@ -6,10 +6,8 @@
 #define THERMO_CONTROLL_H
 
 
-#include "utils.h"
+// #include "utils.h"
 #include "../peripherals/peripherals.h"
-#include "../peripherals/pump.h"
-#include "../eeprom_data/eeprom_data.h"
 #include "sensors_state.h"
 #include "heat_state.h"
 #include "PID_v1.h"
