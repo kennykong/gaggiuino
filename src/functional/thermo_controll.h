@@ -14,7 +14,7 @@
 
 const float HEATER_POWER = 1150.f;            // Gaggia Classic Pro (MODEL: RI9480/SIN035UR) is acually about 1150 Watt
 const float WATER_TEMP_RISE_POWER = 4.2f;     // 1ml water rise 1C need 4.2 Joule == 4.2 Watt*Second
-const float INLET_WATER_TEMP = 75.5f;          // adjust this temp for thermo compensation.
+const float INLET_WATER_TEMP = 75.f;          // adjust this temp for thermo compensation.
 const int HEAT_TIME_INTERVAL = 100;           // ms, pid interval off brew
 const int HEAT_BREW_TIME_INTERVAL = 10;       // ms, pid interval on brew
 const int MAX_BOILER_ON_TIME = 1000;          // ms, pid output max, 100% heater power
