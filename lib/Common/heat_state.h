@@ -15,7 +15,7 @@ struct HeatState {
   float pidOutput;                          // pid out, how many milis boiler on in 1 second, no need to reset when brew on-off
   float lastThermoCompensateHeat;           // Thermo Compensation heat caculate, Unit is Joule
   float lastThermoHeaterConsumed;           // Unit is Joule
-  bool isBoilerOperatorTC;                  // Who operate the boiler, true is Thermo Compensation, false is PID or other.
+  bool isBoilerOperatorTC;                  // Who operated the boiler, true is Thermo Compensation, false is PID or Hard Limit.
 
 };
 
