@@ -34,13 +34,13 @@ PID& getOffBrewPID();
 
 float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
 
-float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState, int timeInterval);
-
-void pulseHeaters(HeatState& heatState);
-
 float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval);
 
 void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval);
+
+float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState, int timeInterval);
+
+void pulseHeaters(HeatState& heatState);
 
 void turnOnBoiler(HeatState& heatState);
 
