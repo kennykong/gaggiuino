@@ -121,12 +121,12 @@ void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
   uint32_t currentTimestamp = millis();
   int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
   if (deltaTime >= timeInterval) {
-    bool isBoilerOperatorTC = true;
+    bool boilerOperatorTC = true;
     if (heatBalance <= 0) {
-      turnOffBoiler(heatState, isBoilerOperatorTC);
+      turnOffBoiler(heatState, boilerOperatorTC);
     }
     else {
-      turnOnBoiler(heatState, isBoilerOperatorTC);
+      turnOnBoiler(heatState, boilerOperatorTC);
     }
   }
 }
