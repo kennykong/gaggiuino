@@ -1,7 +1,7 @@
 /**********************************************************************************************
- * Arduino PID Library - Version 1.2.1
+ * Arduino PID Library - Version 2.0.1
  * by Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
- *
+ * Updated by Kenny <koxy2008@gmail.com>
  * This Library is licensed under the MIT License
  **********************************************************************************************/
 
@@ -11,7 +11,7 @@
   #include "WProgram.h"
 #endif
 
-#include <PID_v1.h>
+#include <PID_v2.h>
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up
