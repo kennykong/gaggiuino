@@ -34,7 +34,7 @@ PID& getOffBrewPID();
 
 float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
 
-float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval);
+float computeHeaterConsumedEnergy(HeatState& heatState, int timeInterval);
 
 void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval);
 

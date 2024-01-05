@@ -25,7 +25,7 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     else {
       computeThermoCompensateEnergy(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
       if (heatState.heatBalancePool > 0.f) {
-        computeHeaterWastedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
+        computeHeaterConsumedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
         driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
       }
       else {

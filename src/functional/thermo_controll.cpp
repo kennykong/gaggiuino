@@ -63,7 +63,7 @@ void resetThemoCompState(HeatState& heatState) {
   heatState.lastWaterPumped = 0.f;
   heatState.lastWaterPumpedTimestamp = millis();
   heatState.lastThermoCompensateHeat = 0.f;
-  heatState.lastThermoHeaterWasted = 0.f;
+  heatState.lastThermoHeaterConsumed = 0.f;
   // turnOffBoiler(heatState);  // not necessary
 
 }
@@ -98,21 +98,21 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   return deltaHeat;
 }
 
-float computeHeaterWastedEnergy(HeatState& heatState, int timeInterval) {
-  float energyWasted = 0.f;
+float computeHeaterConsumedEnergy(HeatState& heatState, int timeInterval) {
+  float energyConsumed = 0.f;
   bool isMyOperation = heatState.isBoilerOperatorTC;
   if (isMyOperation) {
     uint32_t currentTimestamp = millis();
     int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
     if (deltaTime >= timeInterval && heatState.lastBoilerState) {
-      energyWasted = HEATER_POWER * deltaTime * 0.001f;
-      heatState.lastThermoHeaterWasted = energyWasted;
+      energyConsumed = HEATER_POWER * deltaTime * 0.001f;
+      heatState.lastThermoHeaterConsumed = energyConsumed;
 
       // reduce balance
-      heatState.heatBalancePool -= energyWasted;
+      heatState.heatBalancePool -= energyConsumed;
     }
   }
-  return energyWasted;
+  return energyConsumed;
 }
 
 void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
