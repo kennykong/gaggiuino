@@ -25,13 +25,13 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     else {
       computeThermoCompensateEnergy(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
       if (heatState.heatBalancePool > 0.f) {
-        computeHeaterConsumedEnergy(heatState, HEAT_BREW_TIME_INTERVAL);
-        driveHeaterByEnergyBalance(heatState, HEAT_BREW_TIME_INTERVAL);
+        computeHeaterConsumedEnergy(heatState);
+        driveHeaterByEnergyBalance(heatState);
       }
       else {
         //reset the heat balance 
         heatState.heatBalancePool = 0.f;
-        doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+        doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState);
       }
     }
   }
@@ -44,7 +44,7 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
       turnOffBoiler(heatState);
     }
     else {
-      doPIDAdjust(brewTempSetPoint, offBrewPid, currentState, heatState, HEAT_TIME_INTERVAL);
+      doPIDAdjust(brewTempSetPoint, offBrewPid, currentState, heatState);
     }
   }
 

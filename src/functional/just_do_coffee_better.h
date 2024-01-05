@@ -24,8 +24,6 @@ enum class HEATING {
 };
 
 void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive);
-// void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval);
-// void pulseHeaters(const uint32_t pulseLength, const int factor_1, const int factor_2, const bool brewActive);
 void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState);
 void hotWaterMode(const SensorState &currentState);
 

@@ -80,15 +80,17 @@ PID& getOffBrewPID() {
 float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
 
   float deltaHeat = 0.f;
-  float deltaTemp = targetTemp - coldWaterTemp;
   float currentWaterPumped = currentState.waterPumped;
   float deltaWater = currentWaterPumped - heatState.lastWaterPumped;
   uint32_t currentWaterPumpedTimestamp = millis();
   int deltaTime = currentWaterPumpedTimestamp - heatState.lastWaterPumpedTimestamp;
-  if (deltaTime >= timeInterval && deltaWater > 0) {
+  if (deltaWater > 0 && deltaTime >= timeInterval) {
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
+
+    float deltaTemp = targetTemp - coldWaterTemp;
     float deltaHeat = deltaWater * deltaTemp * WATER_TEMP_RISE_POWER;
+
     heatState.lastThermoCompensateHeat = deltaHeat;
 
     // add balance
@@ -98,41 +100,34 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   return deltaHeat;
 }
 
-float computeHeaterConsumedEnergy(HeatState& heatState, int timeInterval) {
+float computeHeaterConsumedEnergy(HeatState& heatState) {
   float energyConsumed = 0.f;
   bool isMyOperation = heatState.isBoilerOperatorTC;
-  if (isMyOperation) {
-    uint32_t currentTimestamp = millis();
-    int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-    if (deltaTime >= timeInterval && heatState.lastBoilerState) {
-      energyConsumed = HEATER_POWER * deltaTime * 0.001f;
-      heatState.lastThermoHeaterConsumed = energyConsumed;
+  if (isMyOperation && heatState.lastBoilerState) {
 
-      // reduce balance
-      heatState.heatBalancePool -= energyConsumed;
-    }
+    energyConsumed = HEATER_POWER * (millis() - heatState.lastBoilerStateTimestamp) * 0.001f;
+    heatState.lastThermoHeaterConsumed = energyConsumed;
+
+    // reduce balance
+    heatState.heatBalancePool -= energyConsumed;
+
   }
   return energyConsumed;
 }
 
-void driveHeaterByEnergyBalance(HeatState& heatState, int timeInterval) {
+void driveHeaterByEnergyBalance(HeatState& heatState) {
   float heatBalance = heatState.heatBalancePool;
-
-  uint32_t currentTimestamp = millis();
-  int deltaTime = currentTimestamp - heatState.lastBoilerStateTimestamp;
-  if (deltaTime >= timeInterval) {
-    bool boilerOperatorTC = true;
-    if (heatBalance <= 0) {
-      turnOffBoiler(heatState, boilerOperatorTC);
-    }
-    else {
-      turnOnBoiler(heatState, boilerOperatorTC);
-    }
+  bool boilerOperatorTC = true;
+  if (heatBalance <= 0) {
+    turnOffBoiler(heatState, boilerOperatorTC);
+  }
+  else {
+    turnOnBoiler(heatState, boilerOperatorTC);
   }
 }
 
 // it's realtime job, cant't accumulate by time.
-float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState, int timeInterval) {
+float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState) {
   
   //do pid
   float outMin = pid.GetOutMin();
