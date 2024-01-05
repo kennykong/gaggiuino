@@ -154,10 +154,11 @@ void pulseHeaters(HeatState& heatState) {
   uint32_t heaterWaveTime = heatState.lastBoilerStateTimestamp;
   bool boilerOn = heatState.lastBoilerState;
   unsigned long onTime = heatState.pidOutput;
-  if (!boilerOn && ((millis() - heaterWaveTime) >= (1000UL - onTime))) {
+  uint32_t currentTime = millis();
+  if (!boilerOn && ((currentTime - heaterWaveTime) >= (1000UL - onTime))) {
     turnOnBoiler(heatState);
   }
-  else if (boilerOn && ((millis() - heaterWaveTime) >= onTime)) {
+  else if (boilerOn && ((currentTime - heaterWaveTime) >= onTime)) {
     turnOffBoiler(heatState);
   }
 }
