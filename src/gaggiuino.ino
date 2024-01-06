@@ -757,7 +757,7 @@ static void brewDetect(void) {
       brewParamsReset();
       paramsReset = true;
       brewActive = true;
-      themoCompHeatStatesReset(brewActive);
+      themoCompHeatStatesReset(brewActive, currentState);
     }
     // needs to be here as it creates a locking state soemtimes if not kept up to date during brew
     // mainly when shotWeight restriction kick in.
@@ -767,7 +767,7 @@ static void brewDetect(void) {
     currentState.pumpClicks = getAndResetClickCounter();
     if (paramsReset) {
       brewParamsReset();
-      themoCompHeatStatesReset(brewActive);
+      themoCompHeatStatesReset(brewActive, currentState);
       paramsReset = false;
     }
   }
@@ -788,10 +788,10 @@ static void brewParamsReset(void) {
   phaseProfiler.reset();
 }
 
-static void themoCompHeatStatesReset(bool brewActive) {
+static void themoCompHeatStatesReset(bool brewActive, const SensorState& currentState) {
   // reset HeatState
   heatState.brewActive = brewActive;
-  resetThemoCompState(heatState);
+  resetThemoCompState(heatState, currentState);
 }
 
 static bool sysReadinessCheck(void) {

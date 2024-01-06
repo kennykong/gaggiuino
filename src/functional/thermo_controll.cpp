@@ -56,7 +56,7 @@ void initOffBrewPID() {
   PIDGroupSingleton::getOffBrewPID().SetSampleTime(dt1);
 }
 
-void resetThemoCompState(HeatState& heatState) {
+void resetThemoCompState(HeatState& heatState, const SensorState& currentState) {
   
   // reset ThemoComp HeatState
   heatState.heatBalancePool = 0.f;
@@ -64,6 +64,7 @@ void resetThemoCompState(HeatState& heatState) {
   heatState.lastWaterPumpedTimestamp = millis();
   heatState.lastThermoCompensateHeat = 0.f;
   heatState.lastThermoHeaterConsumed = 0.f;
+  heatState.lastTemperature = currentState.temperature;
   // turnOffBoiler(heatState);  // not necessary
 
 }
@@ -89,8 +90,11 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
 
     float deltaTemp = targetTemp - coldWaterTemp;
+    // float currentTemp = currentState.temperature;
+    
+    // float correctionTemp = caculateCorrection(heatState, currentTemp, targetTemp);
+    // float correctionTemp = 0.f;
     float deltaHeat = deltaWater * deltaTemp * WATER_TEMP_RISE_POWER;
-
     heatState.lastThermoCompensateHeat = deltaHeat;
 
     // add balance
@@ -100,29 +104,79 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
   return deltaHeat;
 }
 
-float computeHeaterConsumedEnergy(HeatState& heatState) {
+
+float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint) {
+  float correctionTemp = 0;
+  uint32_t currentTime = millis();
+
+  if (currentTime - heatState.lastTemperatureTime >= TEMP_CHECK_INTERVAL) {
+
+    float lastTemp = heatState.lastTemperature;
+    if (abs(currentTemp - lastTemp) >= 0.25f) {
+      float lastTempOffset = lastTemp - setPoint;
+      float currentTempOffset = currentTemp - setPoint;
+
+      // if not converge
+      if (abs(lastTempOffset) - abs(currentTempOffset) < 0) {
+        if (lastTempOffset > 0 && currentTempOffset > 0) {
+          correctionTemp = lastTempOffset - currentTempOffset;
+        }
+        if (lastTempOffset > 0 && currentTempOffset < 0) {
+          correctionTemp = -(lastTempOffset + currentTempOffset);
+        }
+        if (lastTempOffset < 0 && currentTempOffset > 0) {
+          correctionTemp = -(lastTempOffset + currentTempOffset);
+        }
+        if (lastTempOffset < 0 && currentTempOffset < 0) {
+          correctionTemp = lastTempOffset - currentTempOffset;
+        }
+      }
+      
+    }
+    heatState.lastTemperature = currentTemp;
+    heatState.lastTemperatureTime = currentTime;
+  }
+  return correctionTemp;
+}
+
+float computeHeaterConsumedEnergyAndHeat(HeatState& heatState, float currentTemp, float setPoint, int timeInterval) {
   float energyConsumed = 0.f;
   bool isMyOperation = heatState.isBoilerOperatorTC;
-  if (isMyOperation && heatState.lastBoilerState) {
+  int deltaTime = millis() - heatState.lastBoilerStateTimestamp;
+  if (deltaTime >= timeInterval) {
+    if (isMyOperation && heatState.lastBoilerState) {
 
-    energyConsumed = HEATER_POWER * (millis() - heatState.lastBoilerStateTimestamp) * 0.001f;
-    heatState.lastThermoHeaterConsumed = energyConsumed;
+      energyConsumed = HEATER_POWER * deltaTime * 0.001f;
+      heatState.lastThermoHeaterConsumed = energyConsumed;
 
-    // reduce balance
-    heatState.heatBalancePool -= energyConsumed;
-
+      // reduce balance
+      heatState.heatBalancePool -= energyConsumed;
+    }
+    // drive Heater
+    driveHeaterByEnergyBalance(heatState, currentTemp, setPoint);
   }
+  
   return energyConsumed;
 }
 
-void driveHeaterByEnergyBalance(HeatState& heatState) {
+void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float setPoint) {
   float heatBalance = heatState.heatBalancePool;
   bool boilerOperatorTC = true;
   if (heatBalance <= 0) {
-    turnOffBoiler(heatState, boilerOperatorTC);
+    if (currentTemp >= setPoint - 3.f) {
+      turnOffBoiler(heatState, boilerOperatorTC);
+    }
+    else {
+      turnOnBoiler(heatState, boilerOperatorTC);
+    }
   }
   else {
-    turnOnBoiler(heatState, boilerOperatorTC);
+    if (currentTemp <= setPoint + 0.5f) {
+      turnOnBoiler(heatState, boilerOperatorTC);
+    }
+    else {
+      turnOffBoiler(heatState, boilerOperatorTC);
+    }
   }
 }
 
