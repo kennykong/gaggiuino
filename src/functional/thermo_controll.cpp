@@ -65,6 +65,7 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
   heatState.lastThermoCompensateHeat = 0.f;
   heatState.lastThermoHeaterConsumed = 0.f;
   heatState.lastTemperature = currentState.temperature;
+  heatState.lastTemperatureTime = millis();
   // turnOffBoiler(heatState);  // not necessary
 
 }
