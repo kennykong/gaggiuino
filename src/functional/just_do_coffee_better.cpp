@@ -23,9 +23,9 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     //   turnOffBoiler(heatState);
     // }
     // else {
-      computeThermoCompensateEnergy(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+      computeThermoCompensateEnergyByInletWater(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
       if (heatState.heatBalancePool > 0.f) {
-        computeHeaterConsumedEnergyAndHeat(heatState,  currentState.temperature, brewTempSetPoint, HEAT_BREW_TIME_INTERVAL);
+        computeHeaterConsumedEnergyAndDoHeat(heatState,  currentState.temperature, brewTempSetPoint, HEAT_BREW_TIME_INTERVAL);
       }
       else {
         //reset the heat balance 

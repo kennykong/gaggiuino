@@ -79,7 +79,7 @@ PID& getOffBrewPID() {
   return PIDGroupSingleton::getOffBrewPID();
 }
 
-float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
+float computeThermoCompensateEnergyByInletWater(float inletWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
 
   float deltaHeat = 0.f;
   float currentWaterPumped = currentState.waterPumped;
@@ -90,7 +90,7 @@ float computeThermoCompensateEnergy(float coldWaterTemp, float targetTemp, const
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
 
-    float deltaTemp = targetTemp - coldWaterTemp;
+    float deltaTemp = targetTemp - inletWaterTemp;
     // float currentTemp = currentState.temperature;
     
     // float correctionTemp = caculateCorrection(heatState, currentTemp, targetTemp);
@@ -140,7 +140,7 @@ float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint
   return correctionTemp;
 }
 
-float computeHeaterConsumedEnergyAndHeat(HeatState& heatState, float currentTemp, float setPoint, int timeInterval) {
+float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTemp, float setPoint, int timeInterval) {
   float energyConsumed = 0.f;
   bool isMyOperation = heatState.isBoilerOperatorTC;
   int deltaTime = millis() - heatState.lastBoilerStateTimestamp;
@@ -164,7 +164,7 @@ void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float s
   float heatBalance = heatState.heatBalancePool;
   bool boilerOperatorTC = true;
   if (heatBalance <= 0) {
-    if (currentTemp >= setPoint - 3.f) {
+    if (currentTemp >= setPoint - 2.5f) {
       turnOffBoiler(heatState, boilerOperatorTC);
     }
     else {
