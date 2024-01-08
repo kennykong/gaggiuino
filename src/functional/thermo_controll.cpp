@@ -35,7 +35,7 @@ void initOnBrewPID() {
   float min = 0.f;
   float max = MAX_BOILER_ON_TIME;
   float Kp = 300.f;
-  float Ki = 11.65f;
+  float Ki = 11.75f;
   float Kd = 0.f;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
