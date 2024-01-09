@@ -40,7 +40,7 @@
 * - Add multiple brew profiles
 */
 struct eepromValues_t {
-  uint16_t steamSetPoint;
+  float steamSetPoint;
   uint16_t offsetTemp;
   uint16_t hpwr;
   uint16_t mainDivider;
@@ -102,7 +102,7 @@ struct eepromValues_t {
     uint16_t mfProfileSlopeShape;
     float    mfProfilingPressureRestriction;
     /*-----------OTHER---------------------*/
-    uint16_t setpoint;
+    float    setpoint;
     bool     stopOnWeightState;
     float    shotDose;
     float    shotStopOnCustomWeight;

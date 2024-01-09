@@ -74,7 +74,7 @@ void lcdUploadProfile(eepromValues_t &eepromCurrentValues) {
   myNex.writeStr(buttonElemId, ACTIVE_PROFILE(eepromCurrentValues).name);
 
   // Temp
-  myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint);
+  myNex.writeNum("sT.setPoint.val", ACTIVE_PROFILE(eepromCurrentValues).setpoint * 10.f);
   // PI
   myNex.writeNum("piState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionState);
   myNex.writeNum("piFlowState", ACTIVE_PROFILE(eepromCurrentValues).preinfusionFlowState);
@@ -168,7 +168,7 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   myNex.writeNum("deltaState", eepromCurrentValues.brewDeltaState);
 
   // System settings
-  myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint);
+  myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint * 10.f);
   myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp);
   myNex.writeNum("sT.hpwr.val", eepromCurrentValues.hpwr);
   myNex.writeNum("sT.mDiv.val", eepromCurrentValues.mainDivider);
@@ -373,9 +373,9 @@ void lcdFetchDoseSettings(eepromValues_t::profile_t &profile) {
   profile.shotStopOnCustomWeight         = myNex.readNumber("dS.numDoseForced.val") / 10.f;
   profile.shotPreset                     = myNex.readNumber("shotPreset");
 }
-
+ 
 void lcdFetchTemp(eepromValues_t::profile_t &profile) {
-  profile.setpoint       = myNex.readNumber("sT.setPoint.val");
+  profile.setpoint       = myNex.readNumber("sT.setPoint.val") / 10.f;
 }
 
 /**
@@ -404,7 +404,7 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
 }
 
 void lcdFetchBoiler(eepromValues_t &settings) {
-  settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val");
+  settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val") / 10.f;
   settings.offsetTemp                     = myNex.readNumber("sT.offSet.val");
   settings.hpwr                           = myNex.readNumber("sT.hpwr.val");
   settings.mainDivider                    = myNex.readNumber("sT.mDiv.val");
@@ -514,11 +514,11 @@ void lcdSetUpTime(float val) {
   myNex.writeNum("systemUpTime", val);
 }
 
-void lcdSetTemperature(uint16_t val) {
+void lcdSetTemperature(float val) {
   myNex.writeNum("currentTemp", val);
 }
 
-void lcdSetTemperatureDecimal(uint16_t val) {
+void lcdSetTemperatureDecimal(float val) {
   myNex.writeNum("dE.val", val);
 }
 

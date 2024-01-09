@@ -93,7 +93,7 @@ namespace {
     defaultData.brewDeltaState = true;
     defaultData.basketPrefill = false;
     // System settings
-    defaultData.steamSetPoint = 155;
+    defaultData.steamSetPoint = 155.f;
     defaultData.offsetTemp = 0;
     defaultData.hpwr = 550;
     defaultData.mainDivider = 5;
@@ -141,8 +141,8 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
     }
   }
   /* Check various global values */
-  if (eepromValuesNew.steamSetPoint < 1
-  || eepromValuesNew.steamSetPoint > 165
+  if (eepromValuesNew.steamSetPoint < 1.f
+  || eepromValuesNew.steamSetPoint > 165.f
   || eepromValuesNew.mainDivider < 1
   || eepromValuesNew.brewDivider < 1
   || eepromValuesNew.pumpFlowAtZero < 0.210f
