@@ -122,13 +122,13 @@ float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint
         if (lastTempOffset > 0 && currentTempOffset > 0) {
           correctionTemp = lastTempOffset - currentTempOffset;
         }
-        if (lastTempOffset > 0 && currentTempOffset < 0) {
+        else if (lastTempOffset > 0 && currentTempOffset < 0) {
           correctionTemp = -(lastTempOffset + currentTempOffset);
         }
-        if (lastTempOffset < 0 && currentTempOffset > 0) {
+        else if (lastTempOffset < 0 && currentTempOffset > 0) {
           correctionTemp = -(lastTempOffset + currentTempOffset);
         }
-        if (lastTempOffset < 0 && currentTempOffset < 0) {
+        else if (lastTempOffset < 0 && currentTempOffset < 0) {
           correctionTemp = lastTempOffset - currentTempOffset;
         }
       }
@@ -186,10 +186,8 @@ float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, H
   
   //do pid
   float outMin = pid.GetOutMin();
-  //init a illegal output
-  float output = outMin -1.f;
-  //compute output
-  output = pid.Compute(currentState.temperature, targetTemp);
+   //compute output
+  float output = pid.Compute(currentState.temperature, targetTemp);
   //only if output is legal, update the heatState's output to new value
   if (output >= outMin) {
     heatState.lastPidOutputTimestamp = millis();
@@ -198,6 +196,21 @@ float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, H
   //heat boiler use the latest output
   pulseHeaters(heatState);
   return output;
+}
+
+float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState) {
+  float currentTemp = currentState.temperature;
+  float out = (float)pidController.GetOutMin() - 2.f;
+  if (currentTemp < targetTemp - downLimit) {
+    turnOnBoiler(heatState);
+  }
+  else if (currentTemp > targetTemp + upperLimit) {
+    turnOffBoiler(heatState);
+  }
+  else {
+    out = doPIDAdjust(targetTemp, pidController, currentState, heatState);
+  }
+  return out;
 }
 
 void pulseHeaters(HeatState& heatState) {

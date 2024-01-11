@@ -44,6 +44,8 @@ float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint
 
 float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState);
 
+float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState);
+
 void pulseHeaters(HeatState& heatState);
 
 void turnOnBoiler(HeatState& heatState);

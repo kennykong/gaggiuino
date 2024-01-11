@@ -296,8 +296,8 @@ static void modeSelect(void) {
     case OPERATION_MODES::OPMODE_everythingFlowProfiled:
     case OPERATION_MODES::OPMODE_pressureBasedPreinfusionAndFlowProfile:
       nonBrewModeActive = false;
-      if (currentState.hotWaterSwitchState) hotWaterMode(currentState);
-      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState);
+      if (currentState.hotWaterSwitchState) hotWaterMode(currentState, heatState);
+      else if (currentState.steamSwitchState) steamCtrl(runningCfg, currentState, heatState);
       else {
         profiling();
         steamTime = millis();
@@ -316,11 +316,11 @@ static void modeSelect(void) {
       break;
     case OPERATION_MODES::OPMODE_steam:
       nonBrewModeActive = true;
-      steamCtrl(runningCfg, currentState);
+      steamCtrl(runningCfg, currentState, heatState);
 
       if (!currentState.steamSwitchState) {
         brewActive ? flushActivated() : flushDeactivated();
-        steamCtrl(runningCfg, currentState);
+        steamCtrl(runningCfg, currentState, heatState);
         pageValuesRefresh();
       }
       break;

@@ -24,8 +24,8 @@ enum class HEATING {
 };
 
 void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive);
-void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState);
-void hotWaterMode(const SensorState &currentState);
+void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, HeatState &heatState);
+void hotWaterMode(const SensorState &currentState, HeatState &heatState);
 
 #endif
 
