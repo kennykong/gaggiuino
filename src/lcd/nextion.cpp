@@ -169,10 +169,14 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   // System settings
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint * 10.f);
-  myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp);
-  myNex.writeNum("sT.hpwr.val", eepromCurrentValues.hpwr);
-  myNex.writeNum("sT.mDiv.val", eepromCurrentValues.mainDivider);
-  myNex.writeNum("sT.bDiv.val", eepromCurrentValues.brewDivider);
+  myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp * 10.f);
+  myNex.writeNum("sT.InletWaterTemp.val", eepromCurrentValues.inletWaterTemp * 10.f);
+  myNex.writeNum("sT.upperLimit.val", eepromCurrentValues.brewUpperLimitTemp * 10.f);
+  myNex.writeNum("sT.downLimit.val", eepromCurrentValues.brewDownLimitTemp * 10.f);
+
+  // myNex.writeNum("sT.hpwr.val", eepromCurrentValues.hpwr);
+  // myNex.writeNum("sT.mDiv.val", eepromCurrentValues.mainDivider);
+  // myNex.writeNum("sT.bDiv.val", eepromCurrentValues.brewDivider);
 
   myNex.writeNum("sP.n1.val", eepromCurrentValues.lcdSleep);
   myNex.writeNum("sP.lc1.val", eepromCurrentValues.scalesF1);
@@ -405,10 +409,14 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
 
 void lcdFetchBoiler(eepromValues_t &settings) {
   settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val") / 10.f;
-  settings.offsetTemp                     = myNex.readNumber("sT.offSet.val");
-  settings.hpwr                           = myNex.readNumber("sT.hpwr.val");
-  settings.mainDivider                    = myNex.readNumber("sT.mDiv.val");
-  settings.brewDivider                    = myNex.readNumber("sT.bDiv.val");
+  settings.offsetTemp                     = myNex.readNumber("sT.offSet.val") / 10.f;
+  settings.inletWaterTemp                 = myNex.readNumber("sT.inletWaterTemp.val") / 10.f;
+  settings.brewUpperLimitTemp             = myNex.readNumber("sT.upperLimit.val") / 10.f;
+  settings.brewDownLimitTemp              = myNex.readNumber("sT.downLimit.val") / 10.f;
+
+  // settings.hpwr                           = myNex.readNumber("sT.hpwr.val");
+  // settings.mainDivider                    = myNex.readNumber("sT.mDiv.val");
+  // settings.brewDivider                    = myNex.readNumber("sT.bDiv.val");
 }
 
 void lcdFetchSystem(eepromValues_t &settings) {

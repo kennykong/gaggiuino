@@ -94,10 +94,15 @@ namespace {
     defaultData.basketPrefill = false;
     // System settings
     defaultData.steamSetPoint = 155.f;
-    defaultData.offsetTemp = 0;
+    defaultData.offsetTemp = 0.f;
+    defaultData.inletWaterTemp = 69.f;
+    defaultData.brewUpperLimitTemp = 0.5f;
+    defaultData.brewDownLimitTemp = 2.5f;
+
     defaultData.hpwr = 550;
     defaultData.mainDivider = 5;
     defaultData.brewDivider = 3;
+    
     defaultData.powerLineFrequency = 50;
     defaultData.lcdSleep = 16;
     defaultData.warmupState = false;
@@ -143,6 +148,11 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   /* Check various global values */
   if (eepromValuesNew.steamSetPoint < 1.f
   || eepromValuesNew.steamSetPoint > 165.f
+  || eepromValuesNew.inletWaterTemp < 0.f
+  || eepromValuesNew.inletWaterTemp > 100.f
+  || eepromValuesNew.brewUpperLimitTemp > 10.f
+  || eepromValuesNew.brewDownLimitTemp > 10.f
+  || eepromValuesNew.offsetTemp > 20.f
   || eepromValuesNew.mainDivider < 1
   || eepromValuesNew.brewDivider < 1
   || eepromValuesNew.pumpFlowAtZero < 0.210f

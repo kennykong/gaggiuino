@@ -140,7 +140,7 @@ float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint
   return correctionTemp;
 }
 
-float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTemp, float setPoint, int timeInterval) {
+float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTemp, float setPoint, float upperLimit, float downLimit, int timeInterval) {
   float energyConsumed = 0.f;
   bool isMyOperation = heatState.isBoilerOperatorTC;
   int deltaTime = millis() - heatState.lastBoilerStateTimestamp;
@@ -154,17 +154,17 @@ float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTe
       heatState.heatBalancePool -= energyConsumed;
     }
     // drive Heater
-    driveHeaterByEnergyBalance(heatState, currentTemp, setPoint);
+    driveHeaterByEnergyBalance(heatState, currentTemp, setPoint, upperLimit, downLimit);
   }
   
   return energyConsumed;
 }
 
-void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float setPoint) {
+void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float setPoint, float upperLimit, float downLimit) {
   float heatBalance = heatState.heatBalancePool;
   bool boilerOperatorTC = true;
   if (heatBalance <= 0) {
-    if (currentTemp >= setPoint - 2.5f) {
+    if (currentTemp >= setPoint - downLimit) {
       turnOffBoiler(heatState, boilerOperatorTC);
     }
     else {
@@ -172,7 +172,7 @@ void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float s
     }
   }
   else {
-    if (currentTemp <= setPoint + 0.5f) {
+    if (currentTemp <= setPoint + upperLimit) {
       turnOnBoiler(heatState, boilerOperatorTC);
     }
     else {

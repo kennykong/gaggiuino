@@ -41,10 +41,16 @@
 */
 struct eepromValues_t {
   float steamSetPoint;
-  uint16_t offsetTemp;
-  uint16_t hpwr;
-  uint16_t mainDivider;
-  uint16_t brewDivider;
+  float offsetTemp;
+
+  uint16_t hpwr;            //deprecated
+  uint16_t mainDivider;     //deprecated
+  uint16_t brewDivider;     //deprecated
+  
+  float inletWaterTemp;
+  float brewUpperLimitTemp;
+  float brewDownLimitTemp;
+  
   uint8_t activeProfile;
   struct profile_t {
     char     name[PROFILE_NAME_LENGTH];

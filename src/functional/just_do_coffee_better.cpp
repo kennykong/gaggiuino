@@ -8,14 +8,17 @@ extern unsigned long steamTime;
 void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &currentState, HeatState &heatState, const bool brewActive) {
   lcdTargetState((int)HEATING::MODE_brew); // setting the target mode to "brew temp"
   float brewTempSetPoint = ACTIVE_PROFILE(runningCfg).setpoint;
+  float inletWaterTemp = runningCfg.inletWaterTemp;
+  float upperLimit = runningCfg.brewUpperLimitTemp; 
+  float downLimit = runningCfg.brewDownLimitTemp;
   PID& offBrewPid = getOffBrewPID();
   PID& onBrewPid = getOnBrewPID();
 
   if (brewActive) { //if brewState == true
 
-    computeThermoCompensateEnergyByInletWater(INLET_WATER_TEMP, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
+    computeThermoCompensateEnergyByInletWater(inletWaterTemp, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
     if (heatState.heatBalancePool > 0.f) {
-      computeHeaterConsumedEnergyAndDoHeat(heatState, currentState.temperature, brewTempSetPoint, HEAT_BREW_TIME_INTERVAL);
+      computeHeaterConsumedEnergyAndDoHeat(heatState, currentState.temperature, brewTempSetPoint, upperLimit, downLimit, HEAT_BREW_TIME_INTERVAL);
     }
     else {
       //reset the heat balance 
