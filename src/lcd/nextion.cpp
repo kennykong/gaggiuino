@@ -169,8 +169,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
 
   // System settings
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint * 10.f);
-  myNex.writeNum("sT.offSet.val", eepromCurrentValues.offsetTemp * 10.f);
-  myNex.writeNum("sT.InletWaterTemp.val", eepromCurrentValues.inletWaterTemp * 10.f);
+  myNex.writeNum("sT.offset.val", eepromCurrentValues.offsetTemp * 10.f);
+  myNex.writeNum("sT.inletWaterTemp.val", eepromCurrentValues.inletWaterTemp * 10.f);
   myNex.writeNum("sT.upperLimit.val", eepromCurrentValues.brewUpperLimitTemp * 10.f);
   myNex.writeNum("sT.downLimit.val", eepromCurrentValues.brewDownLimitTemp * 10.f);
 

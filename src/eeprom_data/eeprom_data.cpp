@@ -139,7 +139,7 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
       || eepromValuesNew.profiles[i].mfProfileEnd < 0.f
       || eepromValuesNew.profiles[i].mpProfilingStart < 0.f
       || eepromValuesNew.profiles[i].mpProfilingFinish < 0.f
-      || eepromValuesNew.profiles[i].setpoint < 1)
+      || eepromValuesNew.profiles[i].setpoint < 1.f)
     {
       LOG_ERROR(errMsg);
       return false;
@@ -153,8 +153,6 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   || eepromValuesNew.brewUpperLimitTemp > 10.f
   || eepromValuesNew.brewDownLimitTemp > 10.f
   || eepromValuesNew.offsetTemp > 20.f
-  || eepromValuesNew.mainDivider < 1
-  || eepromValuesNew.brewDivider < 1
   || eepromValuesNew.pumpFlowAtZero < 0.210f
   || eepromValuesNew.pumpFlowAtZero > 0.310f
   || eepromValuesNew.scalesF1 < -20000
