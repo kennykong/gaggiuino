@@ -409,7 +409,7 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
 
 void lcdFetchBoiler(eepromValues_t &settings) {
   settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val") / 10.f;
-  settings.offsetTemp                     = myNex.readNumber("sT.offSet.val") / 10.f;
+  settings.offsetTemp                     = myNex.readNumber("sT.offset.val") / 10.f;
   settings.inletWaterTemp                 = myNex.readNumber("sT.inletWaterTemp.val") / 10.f;
   settings.brewUpperLimitTemp             = myNex.readNumber("sT.upperLimit.val") / 10.f;
   settings.brewDownLimitTemp              = myNex.readNumber("sT.downLimit.val") / 10.f;
