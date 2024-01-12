@@ -46,9 +46,9 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, Heat
   currentState.steamSwitchState ? lcdTargetState((int)HEATING::MODE_steam) : lcdTargetState((int)HEATING::MODE_brew); // setting the steam/hot water target temp
   // steam temp control, needs to be aggressive to keep steam pressure acceptable
   float steamTempSetPoint = runningCfg.steamSetPoint;
-  float sensorTemperature = currentState.temperature;
+  float sensorTemperature = currentState.sensorTemperature;
 
-  if (currentState.smoothedPressure > steamThreshold_ || sensorTemperature > steamTempSetPoint + 3.f) {
+  if (currentState.smoothedPressure > steamThreshold_ || sensorTemperature > steamTempSetPoint + 5.f) {
     setBoilerOff();
     setSteamBoilerRelayOff();
     setSteamValveRelayOff();
