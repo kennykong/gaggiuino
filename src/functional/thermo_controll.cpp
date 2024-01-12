@@ -33,9 +33,9 @@ void initOnBrewPID() {
 
   float dt = HEAT_BREW_TIME_INTERVAL;
   float min = 0.f;
-  float max = MAX_BOILER_ON_TIME;
-  float Kp = 300.f;
-  float Ki = 11.75f;
+  float max = MAX_BOILER_ON_PERCENTAGE;
+  float Kp = 45.f;
+  float Ki = 1.76f;
   float Kd = 0.f;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
@@ -46,7 +46,7 @@ void initOnBrewPID() {
 void initOffBrewPID() {
   float dt1 = HEAT_TIME_INTERVAL;
   float min1 = 0.f;
-  float max1 = MAX_BOILER_ON_TIME;
+  float max1 = MAX_BOILER_ON_PERCENTAGE;
   float Kp1 = 45.f;
   float Ki1 = 1.76f;
   float Kd1 = 0.f;
@@ -193,8 +193,10 @@ float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, H
     heatState.lastPidOutputTimestamp = millis();
     heatState.pidOutput = output;
   }
+  //pid turn 10 times in one cycle
+  unsigned long powerAdjustCycle = pid.GetSampleTime() * 10UL;
   //heat boiler use the latest output
-  pulseHeaters(heatState);
+  pulseHeaters(heatState, powerAdjustCycle);
   return output;
 }
 
@@ -213,12 +215,12 @@ float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, 
   return out;
 }
 
-void pulseHeaters(HeatState& heatState) {
+void pulseHeaters(HeatState& heatState, unsigned long powerAdjustCycle) {
   uint32_t heaterWaveTime = heatState.lastBoilerStateTimestamp;
   bool boilerOn = heatState.lastBoilerState;
-  unsigned long onTime = heatState.pidOutput;
+  unsigned long onTime = heatState.pidOutput * 0.01f * powerAdjustCycle;
   uint32_t currentTime = millis();
-  if (!boilerOn && ((currentTime - heaterWaveTime) >= (1000UL - onTime))) {
+  if (!boilerOn && ((currentTime - heaterWaveTime) >= (powerAdjustCycle - onTime))) {
     turnOnBoiler(heatState);
   }
   else if (boilerOn && ((currentTime - heaterWaveTime) >= onTime)) {

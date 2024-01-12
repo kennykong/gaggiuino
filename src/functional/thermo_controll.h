@@ -18,7 +18,7 @@ const float WATER_TEMP_RISE_POWER = 4.2f;     // 1ml water rise 1C need 4.2 Joul
 const float INLET_WATER_TEMP = 69.f;          // adjust this temp for thermo compensation. //deprecated
 const int HEAT_TIME_INTERVAL = 100;           // ms, pid interval off brew
 const int HEAT_BREW_TIME_INTERVAL = 10;       // ms, pid interval on brew
-const int MAX_BOILER_ON_TIME = 1000;          // ms, pid output max, 100% heater power
+const int MAX_BOILER_ON_PERCENTAGE = 100;     // %, pid output max, 100% heater power
 const int TEMP_CHECK_INTERVAL = 400;          // ms, when temp drop to 1C/S. //deprecated
 
 
@@ -46,7 +46,7 @@ float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& curre
 
 float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState);
 
-void pulseHeaters(HeatState& heatState);
+void pulseHeaters(HeatState& heatState, unsigned long powerAdjustCycle);
 
 void turnOnBoiler(HeatState& heatState);
 

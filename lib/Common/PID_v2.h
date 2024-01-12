@@ -67,6 +67,8 @@ class PID
   double GetOutMax();
   double GetOutMin();
 
+  unsigned long GetSampleTime();
+
   bool IsPOnE();
 
 

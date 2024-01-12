@@ -241,6 +241,10 @@ double PID::GetOutMin() {
   return outMin;
 }
 
+unsigned long PID::GetSampleTime() {
+  return SampleTime;
+}
+
 bool PID::IsPOnE() {
   return pOnE;
 }
