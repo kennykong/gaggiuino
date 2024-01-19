@@ -23,9 +23,9 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     else {
       //reset the heat balance 
       heatState.heatBalancePool = 0.f;
-      doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState);
+      // doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState);
+      doPIDAdjustWithLimit(brewTempSetPoint, downLimit, upperLimit, onBrewPid, currentState, heatState);
     }
-    
   }
   else { //if brewState == false
     // if brew temp is 92 C, hard limit temp 82-95 C
