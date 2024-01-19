@@ -95,7 +95,7 @@ namespace {
     // System settings
     defaultData.steamSetPoint = 155.f;
     defaultData.offsetTemp = 0.f;
-    defaultData.inletWaterTemp = 68.5f;
+    defaultData.inletWaterTemp = 69.f;
     defaultData.brewUpperLimitTemp = 0.5f;
     defaultData.brewDownLimitTemp = 2.5f;
 
