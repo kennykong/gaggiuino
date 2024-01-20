@@ -35,9 +35,11 @@ void initOnBrewPID() {
   double min = 0.f;
   double max = MAX_BOILER_ON_PERCENTAGE;
 
-  //Ziegler–Nichols method
+  //Ziegler–Nichols method PI
+  //Tu = 31s
   double Kp = 30.0;
   double Ki = 1.161290322580645;
+  // double Ki = (1.2 * Kp) / 31.0;
   double Kd = 0.0;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
@@ -50,10 +52,12 @@ void initOffBrewPID() {
   int dt1 = HEAT_TIME_INTERVAL;
   double min1 = 0.0;
   double max1 = MAX_BOILER_ON_PERCENTAGE;
-  
-  //Ziegler–Nichols method
+
+  //Ziegler–Nichols method PI
+  //Tu = 31s
   double Kp1 = 4.5;
   double Ki1 = 0.1741935483870968;
+  // double Ki1 = (1.2 * Kp1) / 31.0;
   double Kd1 = 0.0;
 
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
