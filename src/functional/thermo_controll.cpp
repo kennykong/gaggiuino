@@ -37,7 +37,7 @@ void initOnBrewPID() {
   // float Kp = 300.f;
   // float Ki = 11.75f;
   float Kp = 30.f;
-  float Ki = 1.1742f;
+  float Ki = 1.170975f;
   float Kd = 0.f;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
