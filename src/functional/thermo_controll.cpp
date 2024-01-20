@@ -31,14 +31,14 @@ void myPIDsInit() {
 
 void initOnBrewPID() {
   //fast, aggressvie PID
-  float dt = HEAT_BREW_TIME_INTERVAL;
-  float min = 0.f;
-  float max = MAX_BOILER_ON_PERCENTAGE;
-  // float Kp = 300.f;
-  // float Ki = 11.75f;
-  float Kp = 30.f;
-  float Ki = 1.161290322580645f;
-  float Kd = 0.f;
+  int dt = HEAT_BREW_TIME_INTERVAL;
+  double min = 0.f;
+  double max = MAX_BOILER_ON_PERCENTAGE;
+
+  //Ziegler–Nichols method
+  double Kp = 30.0;
+  double Ki = 1.161290322580645;
+  double Kd = 0.0;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
   PIDGroupSingleton::getOnBrewPID().SetOutputLimits(min, max);
@@ -47,14 +47,14 @@ void initOnBrewPID() {
 
 void initOffBrewPID() {
   //slow, balanced PID
-  float dt1 = HEAT_TIME_INTERVAL;
-  float min1 = 0.f;
-  float max1 = MAX_BOILER_ON_PERCENTAGE;
-  // float Kp1 = 45.f;
-  // float Ki1 = 1.76f;
-  float Kp1 = 4.5f;
-  float Ki1 = 0.1741935483870968f;
-  float Kd1 = 0.f;
+  int dt1 = HEAT_TIME_INTERVAL;
+  double min1 = 0.0;
+  double max1 = MAX_BOILER_ON_PERCENTAGE;
+  
+  //Ziegler–Nichols method
+  double Kp1 = 4.5;
+  double Ki1 = 0.1741935483870968;
+  double Kd1 = 0.0;
 
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
   PIDGroupSingleton::getOffBrewPID().SetOutputLimits(min1, max1);
