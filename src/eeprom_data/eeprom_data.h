@@ -47,7 +47,8 @@ struct eepromValues_t {
   uint16_t mainDivider;     //deprecated
   uint16_t brewDivider;     //deprecated
   
-  float inletWaterTemp;
+  // float inletWaterTemp;
+  float compensateTemp;
   float brewUpperLimitTemp;
   float brewDownLimitTemp;
   

@@ -34,7 +34,7 @@ PID& getOnBrewPID();
 
 PID& getOffBrewPID();
 
-float computeThermoCompensateEnergyByInletWater(float inletWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
+float computeThermoCompensateEnergyByInletWater(float compensateTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
 
 float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTemp, float setPoint, float upperLimit, float downLimit, int timeInterval);
 

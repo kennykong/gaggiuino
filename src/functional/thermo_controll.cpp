@@ -84,7 +84,7 @@ PID& getOffBrewPID() {
   return PIDGroupSingleton::getOffBrewPID();
 }
 
-float computeThermoCompensateEnergyByInletWater(float inletWaterTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
+float computeThermoCompensateEnergyByInletWater(float compensateTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
 
   float deltaHeat = 0.f;
   float currentWaterPumped = currentState.waterPumped;
@@ -95,12 +95,12 @@ float computeThermoCompensateEnergyByInletWater(float inletWaterTemp, float targ
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
 
-    float deltaTemp = targetTemp - inletWaterTemp;
+    // float deltaTemp = targetTemp - inletWaterTemp;
     // float currentTemp = currentState.temperature;
     
     // float correctionTemp = caculateCorrection(heatState, currentTemp, targetTemp);
     // float correctionTemp = 0.f;
-    float deltaHeat = deltaWater * deltaTemp * WATER_TEMP_RISE_POWER;
+    float deltaHeat = deltaWater * compensateTemp * WATER_TEMP_RISE_POWER;
     heatState.lastThermoCompensateHeat = deltaHeat;
 
     // add balance

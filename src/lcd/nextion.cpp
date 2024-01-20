@@ -170,7 +170,8 @@ void lcdUploadCfg(eepromValues_t &eepromCurrentValues) {
   // System settings
   myNex.writeNum("sT.steamSetPoint.val", eepromCurrentValues.steamSetPoint * 10.f);
   myNex.writeNum("sT.offset.val", eepromCurrentValues.offsetTemp * 10.f);
-  myNex.writeNum("sT.inletWaterTemp.val", eepromCurrentValues.inletWaterTemp * 10.f);
+  // myNex.writeNum("sT.inletWaterTemp.val", eepromCurrentValues.inletWaterTemp * 10.f);
+  myNex.writeNum("sT.compensateTemp.val", eepromCurrentValues.compensateTemp * 10.f);
   myNex.writeNum("sT.upperLimit.val", eepromCurrentValues.brewUpperLimitTemp * 10.f);
   myNex.writeNum("sT.downLimit.val", eepromCurrentValues.brewDownLimitTemp * 10.f);
 
@@ -410,7 +411,8 @@ void lcdFetchBrewSettings(eepromValues_t &settings) {
 void lcdFetchBoiler(eepromValues_t &settings) {
   settings.steamSetPoint                  = myNex.readNumber("sT.steamSetPoint.val") / 10.f;
   settings.offsetTemp                     = myNex.readNumber("sT.offset.val") / 10.f;
-  settings.inletWaterTemp                 = myNex.readNumber("sT.inletWaterTemp.val") / 10.f;
+  // settings.inletWaterTemp                 = myNex.readNumber("sT.inletWaterTemp.val") / 10.f;
+  settings.compensateTemp                 = myNex.readNumber("sT.compensateTemp.val") / 10.f;
   settings.brewUpperLimitTemp             = myNex.readNumber("sT.upperLimit.val") / 10.f;
   settings.brewDownLimitTemp              = myNex.readNumber("sT.downLimit.val") / 10.f;
 

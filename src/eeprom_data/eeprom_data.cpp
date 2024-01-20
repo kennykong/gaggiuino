@@ -95,7 +95,8 @@ namespace {
     // System settings
     defaultData.steamSetPoint = 155.f;
     defaultData.offsetTemp = 0.f;
-    defaultData.inletWaterTemp = 69.f;
+    // defaultData.inletWaterTemp = 69.f;
+    defaultData.compensateTemp = 23.5f;
     defaultData.brewUpperLimitTemp = 0.5f;
     defaultData.brewDownLimitTemp = 2.5f;
 
@@ -148,8 +149,8 @@ bool eepromWrite(eepromValues_t eepromValuesNew) {
   /* Check various global values */
   if (eepromValuesNew.steamSetPoint < 1.f
   || eepromValuesNew.steamSetPoint > 165.f
-  || eepromValuesNew.inletWaterTemp < 0.f
-  || eepromValuesNew.inletWaterTemp > 100.f
+  || eepromValuesNew.compensateTemp < 0.f
+  || eepromValuesNew.compensateTemp > 100.f
   || eepromValuesNew.brewUpperLimitTemp > 10.f
   || eepromValuesNew.brewDownLimitTemp > 10.f
   || eepromValuesNew.offsetTemp > 20.f
