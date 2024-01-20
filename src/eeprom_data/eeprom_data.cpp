@@ -100,9 +100,9 @@ namespace {
     defaultData.brewUpperLimitTemp = 0.5f;
     defaultData.brewDownLimitTemp = 2.5f;
 
-    defaultData.hpwr = 550;
-    defaultData.mainDivider = 5;
-    defaultData.brewDivider = 3;
+    defaultData.hpwr = 550;           //deprecated
+    defaultData.mainDivider = 5;      //deprecated
+    defaultData.brewDivider = 3;      //deprecated
     
     defaultData.powerLineFrequency = 50;
     defaultData.lcdSleep = 16;
