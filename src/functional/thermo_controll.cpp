@@ -30,14 +30,14 @@ void myPIDsInit() {
 
 
 void initOnBrewPID() {
-  //aggressvie PID
+  //fast, aggressvie PID
   float dt = HEAT_BREW_TIME_INTERVAL;
   float min = 0.f;
   float max = MAX_BOILER_ON_PERCENTAGE;
   // float Kp = 300.f;
   // float Ki = 11.75f;
   float Kp = 30.f;
-  float Ki = 1.170975f;
+  float Ki = 1.161290322580645f;
   float Kd = 0.f;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
@@ -46,14 +46,14 @@ void initOnBrewPID() {
 }
 
 void initOffBrewPID() {
-  //balanced PID
+  //slow, balanced PID
   float dt1 = HEAT_TIME_INTERVAL;
   float min1 = 0.f;
   float max1 = MAX_BOILER_ON_PERCENTAGE;
   // float Kp1 = 45.f;
   // float Ki1 = 1.76f;
   float Kp1 = 4.5f;
-  float Ki1 = 0.17565f;
+  float Ki1 = 0.1741935483870968f;
   float Kd1 = 0.f;
 
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
