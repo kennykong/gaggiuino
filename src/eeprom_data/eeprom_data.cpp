@@ -96,7 +96,7 @@ namespace {
     defaultData.steamSetPoint = 155.f;
     defaultData.offsetTemp = 0.f;
     // defaultData.inletWaterTemp = 69.f;
-    defaultData.compensateTemp = 23.5f;
+    defaultData.compensateTemp = 20.f;        //20-25
     defaultData.brewUpperLimitTemp = 0.5f;
     defaultData.brewDownLimitTemp = 2.5f;
 
