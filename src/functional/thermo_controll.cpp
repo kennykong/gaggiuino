@@ -75,7 +75,7 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
   heatState.lastThermoHeaterConsumed = 0.f;
   heatState.lastTemperature = currentState.temperature;
   heatState.lastTemperatureTime = millis();
-  // turnOffBoiler(heatState);  // not necessary
+  // turnOffBoiler(heatState);  // not necessary ?
 
 }
 
@@ -93,8 +93,17 @@ float computeThermoCompensateEnergyByInletWater(float compensateTemp, float targ
   float deltaHeat = 0.f;
   float currentWaterPumped = currentState.waterPumped;
   float deltaWater = currentWaterPumped - heatState.lastWaterPumped;
+
   uint32_t currentWaterPumpedTimestamp = millis();
-  int deltaTime = currentWaterPumpedTimestamp - heatState.lastWaterPumpedTimestamp;
+  uint32_t lastWaterPumpedTimestamp = heatState.lastWaterPumpedTimestamp;
+  //timer overflow
+  if (currentWaterPumpedTimestamp < lastWaterPumpedTimestamp) {
+    heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
+    return 0.f;
+  }
+
+  int deltaTime = currentWaterPumpedTimestamp - lastWaterPumpedTimestamp;
+  
   if (deltaWater > 0 && deltaTime >= timeInterval) {
     heatState.lastWaterPumped = currentWaterPumped;
     heatState.lastWaterPumpedTimestamp = currentWaterPumpedTimestamp;
@@ -152,7 +161,14 @@ float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint
 float computeHeaterConsumedEnergyAndDoHeat(HeatState& heatState, float currentTemp, float setPoint, float upperLimit, float downLimit, int timeInterval) {
   double energyConsumed = 0.0;
   bool isMyOperation = heatState.isBoilerOperatorTC;
-  unsigned long deltaTime = micros() - heatState.lastBoilerStateTimestamp;
+  u_int32_t lastHeaterWaveTime = heatState.lastBoilerStateTimestamp;
+  u_int32_t currentTime = micros();
+  //timer overflow
+  if (currentTime < lastHeaterWaveTime) {
+    heatState.lastBoilerStateTimestamp = currentTime;
+    return 0.f;
+  }
+  unsigned long deltaTime = currentTime - lastHeaterWaveTime;
   if (deltaTime >= timeInterval * 1000UL) {
     if (isMyOperation && heatState.lastBoilerState) {
 
@@ -203,7 +219,7 @@ double doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, 
   }
   //
   //pid turn 10 times in one powerCycle, so powerCycle = sampleTime *10
-  //ms to us *1000
+  //sampleTime from ms to us *1000
   //so *10000UL
   unsigned long powerAdjustCycle = pid.GetSampleTime() * 10000UL;
   //heat boiler use the latest output
@@ -233,6 +249,11 @@ void pulseHeaters(HeatState& heatState, unsigned long powerAdjustCycle) {
   // powerAdjustCycle is in micro seconds
   unsigned long onTime = round(heatState.pidOutput * 0.01 * powerAdjustCycle);
   uint32_t currentTime = micros();
+  //timer overflow
+  if (currentTime < lastHeaterWaveTime) {
+    heatState.lastBoilerStateTimestamp = currentTime;
+    return;
+  }
   uint32_t deltaTime = currentTime - lastHeaterWaveTime;
   if (!boilerOn && (deltaTime >= (powerAdjustCycle - onTime))) {
     turnOnBoiler(heatState);
