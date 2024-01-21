@@ -89,12 +89,12 @@ class PID
   // double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
   // double *myOutput;             //   This creates a hard link between the variables and the 
   // double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
-                               //   what these values are.  with pointers we'll just know.
+                                  //   what these values are.  with pointers we'll just know.
 			  
 	unsigned long lastTime;
 	double outputSum, lastInput;
 
-	unsigned long SampleTime;
+	unsigned long SampleTime;         // * millis
 	double outMin, outMax;
 	bool pOnE;                        // * Proportional on Error (default) OR Proportional on Measurement
 };

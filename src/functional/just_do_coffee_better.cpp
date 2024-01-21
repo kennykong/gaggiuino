@@ -17,12 +17,12 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
   if (brewActive) { //if brewState == true
 
     computeThermoCompensateEnergyByInletWater(compensateTemp, brewTempSetPoint, currentState, heatState, HEAT_BREW_TIME_INTERVAL);
-    if (heatState.heatBalancePool > 0.f) {
+    if (heatState.heatBalancePool > 0.0) {
       computeHeaterConsumedEnergyAndDoHeat(heatState, currentState.temperature, brewTempSetPoint, upperLimit, downLimit, HEAT_BREW_TIME_INTERVAL);
     }
     else {
       //reset the heat balance 
-      heatState.heatBalancePool = 0.f;
+      heatState.heatBalancePool = 0.0;
       // doPIDAdjust(brewTempSetPoint, onBrewPid, currentState, heatState);
       doPIDAdjustWithLimit(brewTempSetPoint, downLimit, upperLimit, onBrewPid, currentState, heatState);
     }
