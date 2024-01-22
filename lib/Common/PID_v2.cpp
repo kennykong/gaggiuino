@@ -50,7 +50,7 @@ PID::PID(double Kp, double Ki, double Kd)
 }
 
 PID::PID() 
-  :PID::PID(0.f, 0.f, 0.f){
+  :PID::PID(0.0, 0.0, 0.0){
 }
 
 /* Compute() **********************************************************************
@@ -61,7 +61,7 @@ PID::PID()
  **********************************************************************************/
 double PID::Compute(double current_value, double setpoint)
 {
-  double myOutput = outMin - 1.0; //default pid output unavailiable
+  double myOutput = outMin - 1.0; //default pid output illegal for call function
   unsigned long now = millis();
   unsigned long timeChange = (now - lastTime);
   if (timeChange >= SampleTime)
@@ -199,8 +199,8 @@ void PID::SetOutputLimits(double Min, double Max)
  ******************************************************************************/
 void PID::Initialize()
 {
-   outputSum = 0.f;
-   lastInput = 0.f;
+   outputSum = 0.0;
+   lastInput = 0.0;
   //  if(outputSum > outMax) outputSum = outMax;
   //  else if(outputSum < outMin) outputSum = outMin;
 }
