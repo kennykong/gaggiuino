@@ -37,10 +37,10 @@ void initOnBrewPID() {
 
   //Ziegler–Nichols method PI
   //Tu = 31s
-  float Kp = 30.f;
-  float Ki = 1.161290322580645f;
-  // float Ki = (1.2 * Kp) / 31.0;
-  float Kd = 0.0;
+  double Kp = 30.f;
+  double Ki = 1.161290322580645;
+  // double Ki = (1.2 * Kp) / 31.0;
+  double Kd = 0.0;
 
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
   PIDGroupSingleton::getOnBrewPID().SetOutputLimits(min, max);
@@ -50,15 +50,15 @@ void initOnBrewPID() {
 void initOffBrewPID() {
   //slow, balanced PID
   int dt1 = HEAT_TIME_INTERVAL;
-  float min1 = 0.0;
+  float min1 = 0.f;
   float max1 = MAX_BOILER_ON_PERCENTAGE;
 
   //Ziegler–Nichols method PI
   //Tu = 31s
-  float Kp1 = 4.5;
-  float Ki1 = 0.1741935483870968f;
-  // float Ki1 = (1.2 * Kp1) / 31.0;
-  float Kd1 = 0.0;
+  double Kp1 = 4.5;
+  double Ki1 = 0.1741935483870968;
+  // double Ki1 = (1.2 * Kp1) / 31.0;
+  double Kd1 = 0.0;
 
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
   PIDGroupSingleton::getOffBrewPID().SetOutputLimits(min1, max1);
@@ -206,12 +206,12 @@ void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float s
 }
 
 // it's realtime job, cant't accumulate by time.
-float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState) {
+double doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, HeatState& heatState) {
   
   //do pid
-  float outMin = pid.GetOutMin();
+  double outMin = pid.GetOutMin();
    //compute output
-  float output = pid.Compute(currentState.temperature, targetTemp);
+  double output = pid.Compute(currentState.temperature, targetTemp);
   //only if output is legal, update the heatState's output to new value
   if (output >= outMin) {
     heatState.lastPidOutputTimestamp = micros();
@@ -227,9 +227,9 @@ float doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, H
   return output;
 }
 
-float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState) {
+double doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState) {
   float currentTemp = currentState.temperature;
-  float out = pidController.GetOutMin() - 2.f;
+  double out = pidController.GetOutMin() - 2.0;
   if (currentTemp < targetTemp - downLimit) {
     turnOnBoiler(heatState);
   }
@@ -247,7 +247,7 @@ void pulseHeaters(HeatState& heatState, unsigned long powerAdjustCycle) {
   bool boilerOn = heatState.lastBoilerState;
   // output%, so * 0.01
   // powerAdjustCycle is in micro seconds
-  unsigned long onTime = round(heatState.pidOutput * 0.01f * powerAdjustCycle);
+  unsigned long onTime = round(heatState.pidOutput * 0.01 * powerAdjustCycle);
   uint32_t currentTime = micros();
   //timer overflow
   if (currentTime < lastHeaterWaveTime) {
