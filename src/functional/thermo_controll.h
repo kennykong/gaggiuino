@@ -13,12 +13,12 @@
 #include <Arduino.h>
 
 
-const double HEATER_POWER = 1150.0;            // Gaggia Classic Pro (MODEL: RI9480/SIN035UR) is acually about 1150 Watt
+const float HEATER_POWER = 1150.f;            // Gaggia Classic Pro (MODEL: RI9480/SIN035UR) is acually about 1150 Watt
 const float WATER_TEMP_RISE_POWER = 4.2f;     // 1ml water rise 1C need 4.2 Joule == 4.2 Watt*Second
 // const float INLET_WATER_TEMP = 69.f;          // adjust this temp for thermo compensation. //deprecated
 const int HEAT_TIME_INTERVAL = 100;           // ms, pid interval off brew
 const int HEAT_BREW_TIME_INTERVAL = 10;       // ms, pid interval on brew
-const double MAX_BOILER_ON_PERCENTAGE = 100.0;     // %, pid output max, 100% heater power
+const float MAX_BOILER_ON_PERCENTAGE = 100.f;     // %, pid output max, 100% heater power
 const int TEMP_CHECK_INTERVAL = 400;          // ms, when temp drop to 1C/S. //deprecated
 
 
@@ -42,9 +42,9 @@ void driveHeaterByEnergyBalance(HeatState& heatState, float currentTemp, float s
 
 float caculateCorrection(HeatState& heatState, float currentTemp, float setPoint);
 
-double doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState);
+float doPIDAdjust(float targetTemp, PID& pidController, const SensorState& currentState, HeatState& heatState);
 
-double doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState);
+float doPIDAdjustWithLimit(float targetTemp, float downLimit, float upperLimit, PID& pidController, const SensorState& currentState, HeatState& heatState);
 
 void pulseHeaters(HeatState& heatState, unsigned long powerAdjustCycle);
 
