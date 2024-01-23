@@ -212,6 +212,12 @@ void PID::Initialize()
    isFirstRun = true;
 }
 
+void PID::reset(double iOutputSum , double iLastInput)
+{
+   outputSum = iOutputSum;
+   lastInput = iLastInput;
+}
+
 double PID::regulation(double value, double min, double max) {
   if (value > max) value = max;
     else if (value < min) value = min;
@@ -252,6 +258,14 @@ double PID::GetOutMax() {
 
 double PID::GetOutMin() {
   return outMin;
+}
+
+double PID::GetlastInput() {
+  return lastInput;
+}
+
+double PID::GetOutpuSum() {
+  return outputSum;
 }
 
 unsigned long PID::GetSampleTime() {

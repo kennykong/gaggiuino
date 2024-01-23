@@ -65,18 +65,21 @@ class PID
   //Display functions ****************************************************************
 	double GetKp();						  // These functions query the pid for interal values.
 	double GetKi();						  //  they were created mainly for the pid front-end,
-	double GetKd();						  // where it's important to know what is actually 
-	// int GetMode();						  //  inside the PID.
-	int GetDirection();					//
+	double GetKd();						  //  where it's important to know what is actually 
+	// int GetMode();						//  inside the PID.
+	int GetDirection();					//  Direction.
   unsigned long windowStartTime;
 
   double GetOutMax();
   double GetOutMin();
+  double GetOutpuSum();
+  double GetlastInput();
 
   unsigned long GetSampleTime();
 
   bool IsPOnE();
   void Initialize();
+  void reset(double iOutputSum , double iLastInput);  // set The state by given value
 
   double regulation(double value, double min, double max);  //regulation a value
 
