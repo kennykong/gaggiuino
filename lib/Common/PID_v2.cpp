@@ -17,7 +17,7 @@
  *    The parameters specified here are those for for which we can't set up
  *    reliable defaults, so we need to have the user set them.
  ***************************************************************************/
-PID::PID(double Kp, double Ki, double Kd, int POn, int ControllerDirection)
+PID::PID(double Kp, double Ki, double Kd, int PMode, int ControllerDirection)
 {
     // myOutput = Output;
     // myInput = Input;
@@ -30,7 +30,7 @@ PID::PID(double Kp, double Ki, double Kd, int POn, int ControllerDirection)
     SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
 
     PID::SetControllerDirection(ControllerDirection);
-    PID::SetTunings(Kp, Ki, Kd, POn);
+    PID::SetTunings(Kp, Ki, Kd, PMode);
 
     lastTime = millis()-SampleTime;
 
@@ -79,50 +79,48 @@ double PID::Compute(double current_value, double setpoint)
     }
     double dInput = (input - lastInput);
 
-    /* accumulate I */
+    /* accumulate PID_I */
     outputSum += (ki * error);
 
     /*Add Proportional on Measurement, if P_ON_M is specified*/
     if (!pOnE) outputSum -= kp * dInput;
 
     /*last outputSum regulation*/
-    if (outputSum > outMax) outputSum = outMax;
-    else if (outputSum < outMin) outputSum = outMin;
+    outputSum = regulation(outputSum, outMin, outMax);
 
-    /*Add Proportional on Error, if P_ON_E is specified*/
+    /*Add Proportional on Error(PID_P), if P_ON_E is specified*/
     double output;
     if (pOnE) output = kp * error;
     else output = 0;
 
-    /*Compute Rest of PID Output*/
+    /*Add PID_D */
     output += outputSum - kd * dInput;
 
-    if (output > outMax) output = outMax;
-    else if (output < outMin) output = outMin;
-    myOutput = output;
+    /*limit final output range*/
+    myOutput = regulation(output, outMin, outMax);
 
     /*Remember some variables for next time*/
     lastInput = input;
     lastTime = now;
 
-    /*limit range*/
-    if (myOutput > outMax) myOutput = outMax;
-    else if (myOutput < outMin) myOutput = outMin;
+    
   }
   return myOutput;
 }
+
+
 
 /* SetTunings(...)*************************************************************
  * This function allows the controller's dynamic performance to be adjusted.
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
+void PID::SetTunings(double Kp, double Ki, double Kd, int PMode)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
 
-   pOn = POn;
-   pOnE = POn == P_ON_E;
+   pMode = PMode;
+   pOnE = PMode == P_ON_E;
 
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
@@ -142,7 +140,7 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
 
 
 /* SetTunings(...)*************************************************************
- * Set Tunings using the last-rembered POn setting
+ * Set Tunings using the last-rembered PMode setting
  ******************************************************************************/
 void PID::SetTunings(double Kp, double Ki, double Kd)
 {
@@ -212,8 +210,12 @@ void PID::Initialize()
    outputSum = 0.0;
    lastInput = 0.0;
    isFirstRun = true;
-  //  if(outputSum > outMax) outputSum = outMax;
-  //  else if(outputSum < outMin) outputSum = outMin;
+}
+
+double PID::regulation(double value, double min, double max) {
+  if (value > max) value = max;
+    else if (value < min) value = min;
+  return value;
 }
 
 /* SetControllerDirection(...)*************************************************

@@ -18,13 +18,15 @@ class PID
 
   //commonly used functions **************************************************************************
     PID();
-    PID(double, double, double, int, int);   // * constructor.  links the PID to the Input, Output, and 
+    PID(double Kp, double Ki, double Kd, int PMode, int ControllerDirection);   
+                                          // * constructor.  links the PID to the Input, Output, and 
                                           //   Setpoint.  Initial tuning parameters are also set here.
                                           //   (overload for specifying proportional mode)
 
-    PID(double, double, double);           // * constructor.  links the PID to the Input, Output, and 
+    PID(double Kp, double Ki, double Kd);    // * constructor.  links the PID to the Input, Output, and 
                                              //   Setpoint.  Initial tuning parameters are also set here
-    PID(double, double, double, int); 
+                                             
+    PID(double Kp, double Ki, double Kd, int ControllerDirection); 
 	
     // void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
@@ -34,24 +36,28 @@ class PID
                                           //   calculation frequency can be set using SetMode
                                           //   SetSampleTime respectively
 
-    void SetOutputLimits(double, double);   // * clamps the output to a specific range. 0-255 by default, but
+    void SetOutputLimits(double Min, double Max);   
+                                          // * clamps the output to a specific range. 0-255 by default, but
 										                      //   it's likely the user will want to change this depending on
 										                      //   the application
 	
 
 
   //available but not commonly used functions ********************************************************
-    void SetTunings(double, double,       // * While most users will set the tunings once in the 
-                    double);         	  //   constructor, this function gives the user the option
-                                        //   of changing tunings during runtime for Adaptive control
-    void SetTunings(double, double,       // * overload for specifying proportional mode
-                    double, int);         	  
+    void SetTunings(double Kp, double Ki, double Kd);         	  
+                                          // * While most users will set the tunings once in the 
+                                          //   constructor, this function gives the user the option
+                                          //   of changing tunings during runtime for Adaptive control
+    void SetTunings(double Kp, double Ki, double Kd, int PMode);         	  
+                                          // * overload for specifying proportional mode
 
-	  void SetControllerDirection(int);	  // * Sets the Direction, or "Action" of the controller. DIRECT
+	  void SetControllerDirection(int Direction);	  
+                                        // * Sets the Direction, or "Action" of the controller. DIRECT
 										                    //   means the output will increase when error is positive. REVERSE
 										                    //   means the opposite.  it's very unlikely that this will be needed
 										                    //   once it is set in the constructor.
-    void SetSampleTime(int);            // * sets the frequency, in Milliseconds, with which 
+    void SetSampleTime(int NewSampleTime);            
+                                        // * sets the frequency, in Milliseconds, with which 
                                         //   the PID calculation is performed.  default is 100
 										  
 										  
@@ -72,6 +78,8 @@ class PID
   bool IsPOnE();
   void Initialize();
 
+  double regulation(double value, double min, double max);  //regulation a value
+
   private:
 	
 	
@@ -84,14 +92,15 @@ class PID
   double kd;                   // * (D)erivative Tuning Parameter
 
 	int controllerDirection;
-  int pOn;                     // * Proportional on Error (default) OR Proportional on Measurement
+  int pMode;                     // * Proportional on Error (default) OR Proportional on Measurement
 
   // double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
   // double *myOutput;             //   This creates a hard link between the variables and the 
   // double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
-			  
-	unsigned long lastTime;
+
+  	  
+	unsigned long lastTime;           // * pid state	
 	double outputSum, lastInput;
 
 	unsigned long SampleTime;         // * millis
