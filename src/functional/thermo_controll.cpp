@@ -77,6 +77,9 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
   heatState.lastTemperatureTime = millis();
   // turnOffBoiler(heatState);  // not necessary ?
 
+  // reset brew pid
+  getOnBrewPID().Initialize();
+
 }
 
 

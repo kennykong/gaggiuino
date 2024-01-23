@@ -70,10 +70,10 @@ class PID
   unsigned long GetSampleTime();
 
   bool IsPOnE();
-
+  void Initialize();
 
   private:
-	void Initialize();
+	
 	
 	double dispKp;				        // * we'll hold on to the tuning parameters in user-entered 
 	double dispKi;				        //   format for display purposes
