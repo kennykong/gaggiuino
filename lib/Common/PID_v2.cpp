@@ -33,6 +33,8 @@ PID::PID(double Kp, double Ki, double Kd, int POn, int ControllerDirection)
     PID::SetTunings(Kp, Ki, Kd, POn);
 
     lastTime = millis()-SampleTime;
+
+    Initialize();
 }
 
 /*Constructor (...)*********************************************************
@@ -69,7 +71,15 @@ double PID::Compute(double current_value, double setpoint)
     /*Compute all the working error variables*/
     double input = current_value;
     double error = setpoint - input;
+
+    /* make dInput 0 when first run*/
+    if (isFirstRun) {
+      lastInput = input;
+      isFirstRun = false;
+    }
     double dInput = (input - lastInput);
+
+    /* accumulate I */
     outputSum += (ki * error);
 
     /*Add Proportional on Measurement, if P_ON_M is specified*/
@@ -201,6 +211,7 @@ void PID::Initialize()
 {
    outputSum = 0.0;
    lastInput = 0.0;
+   isFirstRun = true;
   //  if(outputSum > outMax) outputSum = outMax;
   //  else if(outputSum < outMin) outputSum = outMin;
 }

@@ -97,6 +97,8 @@ class PID
 	unsigned long SampleTime;         // * millis
 	double outMin, outMax;
 	bool pOnE;                        // * Proportional on Error (default) OR Proportional on Measurement
+  bool isFirstRun;                  // * mark First Run
+  
 };
 #endif
 
