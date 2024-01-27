@@ -48,7 +48,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, Heat
   float steamTempSetPoint = runningCfg.steamSetPoint;
   float sensorTemperature = currentState.sensorTemperature;
 
-  if (currentState.smoothedPressure > steamThreshold_ || sensorTemperature > steamTempSetPoint + 5.f) {
+  if (currentState.smoothedPressure > steamThreshold_ || sensorTemperature > steamTempSetPoint + 7.f) {
     setBoilerOff();
     setSteamBoilerRelayOff();
     setSteamValveRelayOff();
