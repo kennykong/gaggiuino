@@ -28,8 +28,8 @@ void justDoCoffeeBetter(const eepromValues_t &runningCfg, const SensorState &cur
     }
   }
   else { //if brewState == false
-    // if brew temp is 92 C, hard limit temp 82-95 C
-    doPIDAdjustWithLimit(brewTempSetPoint, 10.f, 3.f, offBrewPid, currentState, heatState);
+    // if brew temp is 92 C, hard limit temp 82-97 C
+    doPIDAdjustWithLimit(brewTempSetPoint, 10.f, 5.f, offBrewPid, currentState, heatState);
   }
 
   if (brewActive || !currentState.brewSwitchState) { // keep steam boiler supply valve open while steaming/descale only
@@ -55,7 +55,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, Heat
     setPumpOff();
   } else {
     
-    doPIDAdjustWithLimit(steamTempSetPoint, 5.f, 3.f, getSteamPID(), currentState, heatState);
+    doPIDAdjustWithLimit(steamTempSetPoint, 5.f, 5.f, getSteamPID(), currentState, heatState);
     // if (sensorTemperature < steamTempSetPoint) {
     //   setBoilerOn();
     // } else {
@@ -83,7 +83,7 @@ void hotWaterMode(const SensorState &currentState, HeatState &heatState) {
   closeValve();
   setPumpToRawValue(80);
   // setBoilerOn();
-  doPIDAdjustWithLimit(MAX_WATER_TEMP, 5.f, 3.f, getSteamPID(), currentState, heatState);
+  doPIDAdjustWithLimit(MAX_WATER_TEMP, 5.f, 5.f, getSteamPID(), currentState, heatState);
   // if (currentState.temperature < MAX_WATER_TEMP) setBoilerOn();
   // else setBoilerOff();
 }
