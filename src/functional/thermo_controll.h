@@ -28,11 +28,15 @@ void initOnBrewPID();
 
 void initOffBrewPID();
 
+void initSteamPID();
+
 void resetThemoCompState(HeatState& heatState, const SensorState& currentState);
 
 PID& getOnBrewPID();
 
 PID& getOffBrewPID();
+
+PID& getSteamPID();
 
 float computeThermoCompensateEnergyByInletWater(float compensateTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval);
 

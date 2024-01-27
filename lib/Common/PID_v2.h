@@ -59,7 +59,10 @@ class PID
     void SetSampleTime(int NewSampleTime);            
                                         // * sets the frequency, in Milliseconds, with which 
                                         //   the PID calculation is performed.  default is 100
-										  
+		
+    void SetId(int id);
+
+    int GetId();
 										  
 										  
   //Display functions ****************************************************************
@@ -85,6 +88,7 @@ class PID
 
   private:
 	
+  int id;                       // * pid's id
 	
 	double dispKp;				        // * we'll hold on to the tuning parameters in user-entered 
 	double dispKi;				        //   format for display purposes

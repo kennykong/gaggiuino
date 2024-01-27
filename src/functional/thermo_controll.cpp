@@ -15,6 +15,10 @@ namespace {
       static PID offBrewPID;
       return offBrewPID;
     };
+    static PID& getSteamPID() {
+      static PID steamPID;
+      return steamPID;
+    };
   private:
     
     PIDGroupSingleton() = default;
@@ -26,11 +30,12 @@ namespace {
 void myPIDsInit() {
   initOnBrewPID();
   initOffBrewPID();
+  initSteamPID();
 }
 
 
 void initOnBrewPID() {
-  //fast, aggressvie PID
+  //fast, balanced PID
   int dt = HEAT_BREW_TIME_INTERVAL;
   float min = 0.f;
   float max = MAX_BOILER_ON_PERCENTAGE;
@@ -45,6 +50,7 @@ void initOnBrewPID() {
   PIDGroupSingleton::getOnBrewPID().SetTunings(Kp, Ki, Kd);
   PIDGroupSingleton::getOnBrewPID().SetOutputLimits(min, max);
   PIDGroupSingleton::getOnBrewPID().SetSampleTime(dt);
+  PIDGroupSingleton::getOnBrewPID().SetId(1);  //onbrew pid is 1
 }
 
 void initOffBrewPID() {
@@ -63,6 +69,26 @@ void initOffBrewPID() {
   PIDGroupSingleton::getOffBrewPID().SetTunings(Kp1, Ki1, Kd1);
   PIDGroupSingleton::getOffBrewPID().SetOutputLimits(min1, max1);
   PIDGroupSingleton::getOffBrewPID().SetSampleTime(dt1);
+  PIDGroupSingleton::getOffBrewPID().SetId(2);  //offbrew pid is 2
+}
+
+void initSteamPID() {
+  //fast, aggressvie PID
+  int dt = HEAT_BREW_TIME_INTERVAL;
+  float min = 0.f;
+  float max = MAX_BOILER_ON_PERCENTAGE;
+
+  //Ziegler–Nichols method PI
+  //Tu = 31s
+  double Kp = 30.f;
+  double Ki = 1.2;
+  // double Ki = (1.2 * Kp) / 30.0;
+  double Kd = 0.0;
+
+  PIDGroupSingleton::getSteamPID().SetTunings(Kp, Ki, Kd);
+  PIDGroupSingleton::getSteamPID().SetOutputLimits(min, max);
+  PIDGroupSingleton::getSteamPID().SetSampleTime(dt);
+  PIDGroupSingleton::getSteamPID().SetId(3);  //steam pid is 3
 }
 
 void resetThemoCompState(HeatState& heatState, const SensorState& currentState) {
@@ -78,10 +104,13 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
   // turnOffBoiler(heatState);  // not necessary ?
 
   // reset pid status with current state
-  double outputSum = heatState.pidOutput;
-  double lastInput = currentState.temperature;
-  getOnBrewPID().reset(outputSum, lastInput);
-  getOffBrewPID().reset(outputSum, lastInput);
+  int lastPidOperator = heatState.lastPidOperator;
+  if (lastPidOperator == 1 || lastPidOperator == 2) {
+    double outputSum = heatState.pidOutput;
+    double lastInput = currentState.temperature;
+    getOnBrewPID().reset(outputSum, lastInput);
+    getOffBrewPID().reset(outputSum, lastInput);
+  }
 
 }
 
@@ -92,6 +121,10 @@ PID& getOnBrewPID() {
 
 PID& getOffBrewPID() {
   return PIDGroupSingleton::getOffBrewPID();
+}
+
+PID& getSteamPID() {
+  return PIDGroupSingleton::getSteamPID();
 }
 
 float computeThermoCompensateEnergyByInletWater(float compensateTemp, float targetTemp, const SensorState& currentState, HeatState& heatState, int timeInterval) {
@@ -221,6 +254,7 @@ double doPIDAdjust(float targetTemp, PID& pid, const SensorState& currentState, 
   //only if output is legal, update the heatState's output to new value
   if (output >= outMin) {
     heatState.lastPidOutputTimestamp = micros();
+    heatState.lastPidOperator = pid.GetId();
     heatState.pidOutput = output;
   }
   //

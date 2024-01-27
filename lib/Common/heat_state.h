@@ -13,6 +13,7 @@ struct HeatState {
   float heatBalancePool;                    // Unit is Joule == Watt*Second
   uint32_t lastPidOutputTimestamp;          // micros for better accurcy
   double pidOutput;                         // pid out, percentage of full power, no need to reset when brew on-off
+  int lastPidOperator;                      // pid operator
   float lastTemperature;                    // last Sensor read temperature
   uint32_t lastTemperatureTime;             // last Sensor read temperature timestamp
   float lastThermoCompensateHeat;           // Thermo Compensation heat caculate, Unit is Joule

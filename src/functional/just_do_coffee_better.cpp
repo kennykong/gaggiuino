@@ -55,7 +55,7 @@ void steamCtrl(const eepromValues_t &runningCfg, SensorState &currentState, Heat
     setPumpOff();
   } else {
     
-    doPIDAdjustWithLimit(steamTempSetPoint, 5.f, 3.f, getOnBrewPID(), currentState, heatState);
+    doPIDAdjustWithLimit(steamTempSetPoint, 5.f, 3.f, getSteamPID(), currentState, heatState);
     // if (sensorTemperature < steamTempSetPoint) {
     //   setBoilerOn();
     // } else {
@@ -83,7 +83,7 @@ void hotWaterMode(const SensorState &currentState, HeatState &heatState) {
   closeValve();
   setPumpToRawValue(80);
   // setBoilerOn();
-  doPIDAdjustWithLimit(MAX_WATER_TEMP, 5.f, 3.f, getOnBrewPID(), currentState, heatState);
+  doPIDAdjustWithLimit(MAX_WATER_TEMP, 5.f, 3.f, getSteamPID(), currentState, heatState);
   // if (currentState.temperature < MAX_WATER_TEMP) setBoilerOn();
   // else setBoilerOff();
 }
