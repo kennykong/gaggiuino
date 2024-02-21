@@ -109,7 +109,7 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
     double outputSum = heatState.pidOutput;
     double lastInput = currentState.temperature;
     getOnBrewPID().reset(outputSum, lastInput);
-    getOffBrewPID().reset(outputSum, lastInput);
+    // getOffBrewPID().reset(outputSum, lastInput);
   }
 
 }
