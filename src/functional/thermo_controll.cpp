@@ -106,11 +106,10 @@ void resetThemoCompState(HeatState& heatState, const SensorState& currentState) 
   // reset onbrew pid status with current state(offbrew), only when first time offbrew switch to onbrew
   int lastPidOperator = heatState.lastPidOperator;
   double lastOnBrewOutputSum = getOnBrewPID().GetOutpuSum();
-  if ((lastPidOperator == 1 || lastPidOperator == 2) && lastOnBrewOutputSum == 0) {
+  if (lastPidOperator == 2 && lastOnBrewOutputSum == 0) {
     double outputSum = heatState.pidOutput;
     double lastInput = currentState.temperature;
     getOnBrewPID().reset(outputSum, lastInput);
-    // getOffBrewPID().reset(outputSum, lastInput);
   }
 
 }
