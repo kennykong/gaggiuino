@@ -42,7 +42,7 @@ void initOnBrewPID() {
 
   //Ziegler–Nichols method PI
   //Tu = 31s
-  double Kp = 30.f;
+  double Kp = 30.0;
   double Ki = 1.161290322580645;
   // double Ki = (1.2 * Kp) / 31.0;
   double Kd = 0.0;
@@ -80,7 +80,7 @@ void initSteamPID() {
 
   //Ziegler–Nichols method PI
   //Tu = 31s
-  double Kp = 30.f;
+  double Kp = 30.0;
   double Ki = 1.2;
   // double Ki = (1.2 * Kp) / 30.0;
   double Kd = 0.0;
