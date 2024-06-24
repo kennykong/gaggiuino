@@ -37,7 +37,7 @@
 #define GET_SCALES_READ_EVERY   100 // Scales refresh interval (ms)
 #define REFRESH_SCREEN_EVERY    150 // Screen refresh interval (ms)
 #define REFRESH_FLOW_EVERY      50 // Flow refresh interval (ms)
-#define HEALTHCHECK_EVERY       12000 // System checks happen every 30sec
+#define HEALTHCHECK_EVERY       10000 // System checks happen every 30sec
 #define BOILER_FILL_START_TIME  3000UL // Boiler fill start time - 3 sec since system init.
 #define BOILER_FILL_TIMEOUT     8000UL // Boiler fill timeout - 8sec since system init.
 #define BOILER_FILL_SKIP_TEMP   85.f // Boiler fill skip temperature threshold
